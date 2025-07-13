@@ -28,7 +28,7 @@ namespace POS_System.ApplicationServices.Implementation
 
         public async Task<List<ProductLineItemDto>> GetProductLineItems()
         {
-            var domainModel = await repository.GetAsync();
+            var domainModel = await repository.GetAllWithNavPropsAsync();
             return mapper.Map<List<ProductLineItemDto>>(domainModel);
         }
 

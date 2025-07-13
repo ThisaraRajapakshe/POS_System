@@ -8,5 +8,7 @@
         public double Cost { get; set; }
         public double DisplayPrice { get; set; }
         public double DiscountedPrice { get; set; }
+
+        public ProductDto Product { get; set; }
     }
 }
