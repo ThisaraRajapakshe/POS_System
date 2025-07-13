@@ -23,7 +23,7 @@ namespace POS_System.ApplicationServices.Implementation
 
         public async Task<List<ProductDto>> GetProducts()
         {
-            var productDomainModel = await repository.GetAsync();
+            var productDomainModel = await repository.GetAllWithCategoryAsync();
             return  mapper.Map<List<ProductDto>>(productDomainModel);
         }
 
