@@ -20,5 +20,13 @@ namespace POS_System.Repositories.Implementation
                     ThenInclude(p => p.Category).
                 ToListAsync();
         }
+
+        public async Task<List<ProductLineItem>> GetLineItemByProduct(string productId)
+        {
+            return await dbContext.ProductLineItems
+                .Where(x => x.ProductId == productId)
+                .Include(p => p.Product)
+                .ToListAsync();
+        }
     }
 }

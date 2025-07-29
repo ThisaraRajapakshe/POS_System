@@ -10,5 +10,6 @@ namespace POS_System.ApplicationServices
         Task<ProductDto> InsertProduct(CreateProductRequestDto product);
         Task<ProductDto?> UpdateProduct(UpdateProductRequestDto updateProductRequestDto, string id);
         Task<bool> DeleteProduct(string id);
+        Task<List<ProductDto?>> GetProductsByCategory(string categoryId);
     }
 }

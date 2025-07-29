@@ -57,5 +57,16 @@ namespace POS_System.ApplicationServices.Implementation
             return productDto;
 
         }
+
+        public async Task<List<ProductDto?>> GetProductsByCategory(string categoryId)
+        {
+            var domainModel = await repository.GetProductsByCategoryAsync(categoryId);
+            if (domainModel == null)
+            {
+                return new List<ProductDto?>();
+            }
+            return mapper.Map<List<ProductDto?>>(domainModel);
+            
+        }
     }
 }

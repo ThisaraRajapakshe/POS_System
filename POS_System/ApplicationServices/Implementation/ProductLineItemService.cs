@@ -20,6 +20,16 @@ namespace POS_System.ApplicationServices.Implementation
             return repository.DeleteAsync(id);
         }
 
+        public async Task<List<ProductLineItemDto?>> GetLineItemByProductIdAsync(string productId)
+        {
+            var domainModel = await repository.GetLineItemByProduct(productId);
+            if (domainModel == null) 
+            {
+                return new List<ProductLineItemDto?>();
+            }
+            return mapper.Map<List<ProductLineItemDto?>>(domainModel);
+        }
+
         public async Task<ProductLineItemDto?> GetProductLineItem(string id)
         {
             var domainModel = await repository.GetAsync(id);

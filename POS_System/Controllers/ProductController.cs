@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using POS_System.ApplicationServices;
+using POS_System.Models.Domain;
 using POS_System.Models.Dto;
 using System.Reflection.Metadata.Ecma335;
 
@@ -54,6 +55,18 @@ namespace POS_System.Controllers
         public async Task<IActionResult> Delete([FromRoute] string id)
         {
             return await (productService.DeleteProduct(id)) ? Ok(): NotFound();
+        }
+        //Get Products by Category ID
+        //GET /api/categories/{id}/products
+        [HttpGet("category/{categoryId}")]
+        public async Task<IActionResult> GetProductsbyCategory([FromRoute] string categoryId)
+        {
+            var productList = await productService.GetProductsByCategory(categoryId);
+            if (productList == null)
+            {
+                return NotFound();
+            }
+            return Ok(productList);
         }
 
     }

@@ -55,5 +55,15 @@ namespace POS_System.Controllers
         {
             return await (productService.DeleteProductLineItem(id)) ? Ok() : NotFound();
         }
+        [HttpGet("product{productId}")]
+        public async Task<IActionResult> GetLineItemByProduct([FromRoute] string productId)
+        {
+            var lineItem = await productService.GetLineItemByProductIdAsync(productId);
+            if (lineItem == null)
+            {
+                return NotFound();
+            }
+            return Ok(lineItem);
+        }
     }
 }

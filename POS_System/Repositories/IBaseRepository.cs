@@ -6,7 +6,7 @@
         Task<List<T>> GetAsync();
 
         Task<T> CreateAsync(T entity);
-        Task<T> UpdateAsync(T entity, TKey id);
+        Task<T?> UpdateAsync(T entity, TKey id);
         Task<bool> DeleteAsync(TKey id);
        
     }
