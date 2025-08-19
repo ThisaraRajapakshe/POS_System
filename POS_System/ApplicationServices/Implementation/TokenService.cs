@@ -43,9 +43,9 @@ namespace POS_System.ApplicationServices.Implementation
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? ""),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim("nameid", user.Id),                     // short name identifier
                 new Claim(JwtRegisteredClaimNames.Jti, jti),
-                new Claim(ClaimTypes.Name, user.FullName ?? user.UserName ?? "")
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.FullName ?? user.UserName ?? "")
             };
 
             if (!string.IsNullOrEmpty(user.Email))
@@ -54,7 +54,9 @@ namespace POS_System.ApplicationServices.Implementation
                 claims.Add(new Claim("branchId", user.BranchId));
 
             foreach (var r in roles)
-                claims.Add(new Claim(ClaimTypes.Role, r));
+                claims.Add(new Claim("role", r));
+
+
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
