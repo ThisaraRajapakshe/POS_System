@@ -11,6 +11,7 @@ using POS_System.Models.Identity;
 using POS_System.Repositories;
 using POS_System.Repositories.Implementation;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -131,8 +132,13 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
             ClockSkew = TimeSpan.Zero,
-            NameClaimType = "nameid",
-            RoleClaimType = "role"
+            //NameClaimType = "nameid",
+            //RoleClaimType = "role"
+
+            // Specify which claim to use for the user's name
+            NameClaimType = ClaimTypes.NameIdentifier,
+            // Specify which claim to use for roles
+            RoleClaimType = ClaimTypes.Role
         };
 
 
