@@ -16,8 +16,6 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Services --------------------------------------------------------------
-
-// Controllers & Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -60,17 +58,117 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// DB contexts
+// DB contexts (keep your connection strings in appsettings / user-secrets)
 builder.Services.AddDbContext<PosSystemDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("PosSystemConnectionString")));
-
 builder.Services.AddDbContext<PosSystemAuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("PosSystemAuthConnectionString")));
 
+
+
+// App services / repos
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductLineItemRepository, ProductLineItemRepository>();
+builder.Services.AddScoped<IProductLineItemService, ProductLineItemService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// AutoMapper
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<AutoMapperProfiles>());
+
+// Jwt settings (user-secrets in Development)
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
+    ?? throw new InvalidOperationException("JWT settings not found.");
+// Temporary debug: Log JWT settings to console
+Console.WriteLine($"JWT Key (length {jwtSettings.Key.Length}): {jwtSettings.Key}");
+Console.WriteLine($"JWT Issuer: {jwtSettings.Issuer}");
+Console.WriteLine($"JWT Audience: {jwtSettings.Audience}");
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", p => p
+        .WithOrigins("http://localhost:4200")
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
+
+// ------------------ AUTHENTICATION (JWT only) ------------------------------
+
+// Preserve claim names exactly as you emit them
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
+
+// Configure JWT Bearer
+builder.Services.AddAuthentication(options =>
+{
+    // Set the default authentication scheme to JWT Bearer
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
+    {
+        // For local/dev convenience this example uses relaxed issuer/audience checks.
+        // For production set ValidateIssuer/Audience = true and supply correct values.
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings.Issuer,
+
+            ValidateAudience = true,
+            ValidAudience = jwtSettings.Audience,
+
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+            ClockSkew = TimeSpan.Zero,
+            NameClaimType = "nameid",
+            RoleClaimType = "role"
+        };
+
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                var auth = ctx.Request.Headers["Authorization"].ToString();
+                var preview = string.IsNullOrEmpty(auth) ? "<none>" : (auth.Length <= 120 ? auth : auth.Substring(0, 120) + "...");
+                logger.LogInformation("JwtBearer.OnMessageReceived: Authorization header preview: {preview}", preview);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = ctx =>
+            {
+                var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                var claims = string.Join(", ", ctx.Principal!.Claims.Select(c => $"{c.Type}={c.Value}"));
+                logger.LogInformation("JwtBearer.OnTokenValidated: validated. Claims: {claims}", claims);
+                logger.LogInformation("JwtBearer.OnTokenValidated: IsInRole('Admin') => {isAdmin}", ctx.Principal!.IsInRole("Admin"));
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = ctx =>
+            {
+                var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogWarning(ctx.Exception, "JwtBearer.OnAuthenticationFailed: {msg}", ctx.Exception?.Message);
+                return Task.CompletedTask;
+            }
+        };
+    });
+//builder.Services.AddAuthorization();
+
+// Now add Identity (after JWT)
 // Identity
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
-    // password + lockout + user settings (same as before)
+    // keep the same password/lockout/user settings you had
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
@@ -88,159 +186,30 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddEntityFrameworkStores<PosSystemAuthDbContext>()
 .AddDefaultTokenProviders();
 
-// prevent cookie-redirects for APIs (return proper 401/403)
+// Prevent cookie auto-redirect for APIs
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Events.OnRedirectToLogin = ctx =>
-    {
-        ctx.Response.StatusCode = 401;
-        return Task.CompletedTask;
-    };
-    options.Events.OnRedirectToAccessDenied = ctx =>
-    {
-        ctx.Response.StatusCode = 403;
-        return Task.CompletedTask;
-    };
+    options.Events.OnRedirectToLogin = ctx => { ctx.Response.StatusCode = 401; return Task.CompletedTask; };
+    options.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = 403; return Task.CompletedTask; };
 });
 
-// App services / repositories
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IProductLineItemRepository, ProductLineItemRepository>();
-builder.Services.AddScoped<IProductLineItemService, ProductLineItemService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-
-// AutoMapper
-builder.Services.AddAutoMapper(cfg => cfg.AddProfile<AutoMapperProfiles>());
-
-// JWT configuration
-if (builder.Environment.IsDevelopment())
-    builder.Configuration.AddUserSecrets<Program>();
-
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
-var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
-    ?? throw new InvalidOperationException("JWT settings not found.");
-
-// CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngularApp", policy => policy
-        .WithOrigins("http://localhost:4200")
-        .AllowAnyHeader()
-        .AllowAnyMethod());
-});
-
-// --- Authentication (JWT only) --------------------------------------------
-
-// Make claim mapping explicit (do this BEFORE AddAuthentication)
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
-
-// Configure JWT Bearer
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings.Issuer,
-            ValidAudience = jwtSettings.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
-            ClockSkew = TimeSpan.Zero,
-
-            // These must match the claim names in your generated tokens
-            RoleClaimType = "role",
-            NameClaimType = "nameid"
-        };
-
-        // Log token validation / failures (safe)
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = ctx =>
-            {
-                // log the incoming raw token length/preview (safe)
-                var token = ctx.Request.Headers["Authorization"].FirstOrDefault();
-                var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                if (!string.IsNullOrEmpty(token))
-                {
-                    var preview = token.Length <= 200 ? token : token.Substring(0, 200) + "...";
-                    logger.LogInformation("JwtBearer.OnMessageReceived: Authorization header preview: {preview}", preview);
-                }
-                else
-                {
-                    logger.LogInformation("JwtBearer.OnMessageReceived: Authorization header not provided");
-                }
-                return Task.CompletedTask;
-            },
-            OnTokenValidated = ctx =>
-            {
-                var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                var claims = string.Join(", ", ctx.Principal!.Claims.Select(c => $"{c.Type}={c.Value}"));
-                logger.LogInformation("JwtBearer.OnTokenValidated: Token validated. Claims: {claims}", claims);
-                logger.LogInformation("JwtBearer.OnTokenValidated: IsInRole('Admin') => {isAdmin}", ctx.Principal!.IsInRole("Admin"));
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = ctx =>
-            {
-                var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                logger.LogWarning(ctx.Exception, "JwtBearer.OnAuthenticationFailed: Authentication failed");
-                if (ctx.Exception != null)
-                {
-                    // also write the exception message for quick inspection
-                    logger.LogWarning("JwtBearer.OnAuthenticationFailed: Exception message: {msg}", ctx.Exception.Message);
-                }
-                return Task.CompletedTask;
-            }
-        };
-
-    });
-
-// Authorization (default)
-builder.Services.AddAuthorization();
-
+// --- Build app -------------------------------------------------------------
 var app = builder.Build();
 
-// --- HTTP pipeline --------------------------------------------------------
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS System API v1");
-        c.RoutePrefix = "swagger"; // UI at /swagger
-    });
-
-    // convenience: redirect root to swagger in dev
-    app.MapGet("/", context =>
-    {
-        context.Response.Redirect("/swagger");
-        return Task.CompletedTask;
+        c.RoutePrefix = "swagger"; // swagger at site root in dev
     });
 }
-
-// quick ping
-app.MapGet("/ping", () => Results.Ok("pong")).AllowAnonymous();
-
-// debug routes listing
-app.MapGet("/debug/routes", (EndpointDataSource eds) =>
-{
-    var routes = eds.Endpoints
-        .OfType<RouteEndpoint>()
-        .Select(e => $"{e.RoutePattern.RawText} -> {e.DisplayName}");
-    return Results.Text(string.Join(Environment.NewLine, routes));
-}).RequireAuthorization(); // protect debug route if you wish (optional)
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAngularApp");
 
-// Diagnostic: log request summary & Authorization header preview (optional)
-// Place before auth so we can see header presence
+// Diagnostic: log request summary (before auth)
 app.Use(async (context, next) =>
 {
     var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
@@ -256,11 +225,19 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// debug route (unprotected so you can always call it)
+app.MapGet("/debug/routes", (EndpointDataSource eds) =>
+{
+    var routes = eds.Endpoints.OfType<RouteEndpoint>().Select(e => $"{e.RoutePattern.RawText} -> {e.DisplayName}");
+    return Results.Text(string.Join(Environment.NewLine, routes));
+}).AllowAnonymous();
+
+// Seed roles / admin (your existing method)
 await SeedRolesAndAdminAsync(app);
 
 app.Run();
 
-// --- Helper: seed roles & admin user -------------------------------------
+// ----------------- Seed roles helper (paste your method) -------------------
 static async Task SeedRolesAndAdminAsync(IHost host)
 {
     using var scope = host.Services.CreateScope();
@@ -279,9 +256,7 @@ static async Task SeedRolesAndAdminAsync(IHost host)
     foreach (var r in roleDefinitions)
     {
         if (!await roleManager.RoleExistsAsync(r.Name))
-        {
             await roleManager.CreateAsync(new ApplicationRole { Name = r.Name, Description = r.Description });
-        }
     }
 
     var adminEmail = "admin@pos.local";
@@ -301,13 +276,9 @@ static async Task SeedRolesAndAdminAsync(IHost host)
 
         var result = await userManager.CreateAsync(adminUser, "Admin@1234!");
         if (result.Succeeded)
-        {
             await userManager.AddToRoleAsync(adminUser, "Admin");
-        }
         else
-        {
             foreach (var err in result.Errors)
                 Console.WriteLine($"Error creating admin user: {err.Description}");
-        }
     }
 }

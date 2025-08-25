@@ -105,7 +105,8 @@ namespace POS_System.ApplicationServices.Implementation
             if (principal == null) return null;
 
             var jwtId = principal.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            var userId = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            // NEW - matches the "nameid" claim you emit
+            var userId = principal.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
             if (string.IsNullOrEmpty(jwtId) || string.IsNullOrEmpty(userId)) return null;
 
             var stored = await _authDb.RefreshTokens.FirstOrDefaultAsync(x => x.Token == request.RefreshToken);
