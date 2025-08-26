@@ -42,8 +42,9 @@ namespace POS_System.ApplicationServices.Implementation
             var jti = Guid.NewGuid().ToString();
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? ""),
-                new Claim("nameid", user.Id),                     // short name identifier
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? ""),
                 new Claim(JwtRegisteredClaimNames.Jti, jti),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.FullName ?? user.UserName ?? "")
             };
