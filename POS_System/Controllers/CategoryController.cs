@@ -5,14 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using POS_System.ApplicationServices;
 using POS_System.ApplicationServices.Implementation;
 using POS_System.Models.Dto;
+using POS_System.Models.Identity;
 
 namespace POS_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles = "Admin")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService categoryService;
@@ -39,6 +38,7 @@ namespace POS_System.Controllers
             return Ok(product);
         }
         [HttpPost]
+        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> Create([FromBody] CreateCategoryRequestDto createCategoryRequestDto)
         {
             return Ok(await categoryService.InsertCategory(createCategoryRequestDto));
@@ -46,6 +46,8 @@ namespace POS_System.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
+
         public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdateCategoryRequestDto updateCategoryRequestDto)
         {
             var product = await categoryService.UpdateCategory(updateCategoryRequestDto, id);
@@ -57,6 +59,7 @@ namespace POS_System.Controllers
         }
         [HttpDelete]
         [Route("{id}")]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> Delete([FromRoute] string id)
         {
             return await (categoryService.DeleteCategory(id)) ? Ok() : NotFound();

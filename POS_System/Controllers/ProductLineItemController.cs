@@ -1,13 +1,18 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using POS_System.ApplicationServices;
 using POS_System.ApplicationServices.Implementation;
 using POS_System.Models.Dto;
+using POS_System.Models.Identity;
 
 namespace POS_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+
     public class ProductLineItemController : ControllerBase
     {
         private readonly IProductLineItemService productService;
@@ -33,6 +38,7 @@ namespace POS_System.Controllers
             return Ok(product);
         }
         [HttpPost]
+        [Authorize (Roles = $"{RoleConstants.Admin},{RoleConstants.Manager},{RoleConstants.StockClerk}")]
         public async Task<IActionResult> Create([FromBody] CreateProductLineItemRequestDto createProductLineItemRequest)
         {
             return Ok(await productService.InsertProductLineItem(createProductLineItemRequest));
@@ -40,6 +46,8 @@ namespace POS_System.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager},{RoleConstants.StockClerk},{RoleConstants.Accountant}")]
+
         public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdateProductLineItemRequestDto updateProductLineItemRequest)
         {
             var product = await productService.UpdateProductLineItem(updateProductLineItemRequest, id);
@@ -51,6 +59,7 @@ namespace POS_System.Controllers
         }
         [HttpDelete]
         [Route("{id}")]
+        [Authorize (Roles = $"{RoleConstants.Admin},{RoleConstants.Manager},{RoleConstants.StockClerk}")]
         public async Task<IActionResult> Delete([FromRoute] string id)
         {
             return await (productService.DeleteProductLineItem(id)) ? Ok() : NotFound();

@@ -90,9 +90,9 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"))
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
     ?? throw new InvalidOperationException("JWT settings not found.");
 // Temporary debug: Log JWT settings to console
-Console.WriteLine($"JWT Key (length {jwtSettings.Key.Length}): {jwtSettings.Key}");
-Console.WriteLine($"JWT Issuer: {jwtSettings.Issuer}");
-Console.WriteLine($"JWT Audience: {jwtSettings.Audience}");
+//Console.WriteLine($"JWT Key (length {jwtSettings.Key.Length}): {jwtSettings.Key}");
+//Console.WriteLine($"JWT Issuer: {jwtSettings.Issuer}");
+//Console.WriteLine($"JWT Audience: {jwtSettings.Audience}");
 
 // CORS
 builder.Services.AddCors(options =>
@@ -170,7 +170,6 @@ builder.Services.AddAuthentication(options =>
     });
 //builder.Services.AddAuthorization();
 
-// Now add Identity (after JWT)
 // Identity
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
@@ -243,7 +242,7 @@ await SeedRolesAndAdminAsync(app);
 
 app.Run();
 
-// ----------------- Seed roles helper (paste your method) -------------------
+// ----------------- Seed roles helper -------------------
 static async Task SeedRolesAndAdminAsync(IHost host)
 {
     using var scope = host.Services.CreateScope();

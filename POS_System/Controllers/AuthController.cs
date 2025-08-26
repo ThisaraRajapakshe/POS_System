@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using POS_System.ApplicationServices;
@@ -39,7 +40,7 @@ namespace POS_System.Controllers
         }
 
         [HttpPost("register")]
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme ,Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
             if (!ModelState.IsValid)
@@ -76,7 +77,7 @@ namespace POS_System.Controllers
         }
 
         [HttpPost("revoke")]
-        [Authorize]
+        [Authorize (AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenDto revokeTokenDto)
         {
             if (!ModelState.IsValid)
@@ -95,7 +96,7 @@ namespace POS_System.Controllers
         }
 
         [HttpPost("logout")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Logout()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -116,7 +117,7 @@ namespace POS_System.Controllers
         }
 
         [HttpPost("change-password")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
         {
             if (!ModelState.IsValid)
@@ -142,7 +143,7 @@ namespace POS_System.Controllers
         }
 
         [HttpGet("profile")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetProfile()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -180,7 +181,7 @@ namespace POS_System.Controllers
         }
 
         [HttpPost("assign-role")]
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> AssignRole([FromBody] AssignRoleDto assignRoleDto)
         {
             if (!ModelState.IsValid)
@@ -199,7 +200,7 @@ namespace POS_System.Controllers
         }
 
         [HttpPost("remove-role")]
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> RemoveRole([FromBody] AssignRoleDto removeRoleDto)
         {
             if (!ModelState.IsValid)
@@ -218,7 +219,7 @@ namespace POS_System.Controllers
         }
 
         [HttpGet("users/{userId}/roles")]
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> GetUserRoles(string userId)
         {
             var roles = await _authService.GetUserRolesAsync(userId);
