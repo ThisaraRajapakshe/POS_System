@@ -212,6 +212,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// 1. First, enable routing.
+app.UseRouting();
 app.UseCors("AllowAngularApp");
 
 // Diagnostic: log request summary (before auth)

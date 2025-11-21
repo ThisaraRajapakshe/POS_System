@@ -59,6 +59,7 @@ namespace POS_System.Controllers
         }
 
         [HttpPost("refresh")]
+        [AllowAnonymous]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshRequestDto refreshRequest)
         {
             if (!ModelState.IsValid)
