@@ -25,7 +25,8 @@ namespace POS_System.Repositories.Implementation
         {
             return await dbContext.ProductLineItems
                 .Where(x => x.ProductId == productId)
-                .Include(p => p.Product)
+                .Include(pli => pli.Product)
+                    .ThenInclude(p => p.Category)
                 .ToListAsync();
         }
     }

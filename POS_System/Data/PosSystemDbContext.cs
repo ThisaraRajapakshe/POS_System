@@ -5,7 +5,7 @@ namespace POS_System.Data
 {
     public class PosSystemDbContext: DbContext
     {
-        public PosSystemDbContext(DbContextOptions dbContextOptions): base(dbContextOptions)
+        public PosSystemDbContext(DbContextOptions<PosSystemDbContext> dbContextOptions): base(dbContextOptions)
         {
             
         }
