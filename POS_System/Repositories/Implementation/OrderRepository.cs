@@ -19,16 +19,25 @@ namespace POS_System.Repositories.Implementation
 
             try
             {
+                order.TotalAmount = 0;
                 await _context.Orders.AddAsync(order);
 
                 foreach (var item in order.OrderItems)
                 {
                     //  1. Find Product in inventory
-                    var productInDb = await _context.ProductLineItems.FirstOrDefaultAsync(x => x.Id == item.ProductLineItemId);
+                    var productInDb = await _context.ProductLineItems
+                        .Include(x => x.Product)
+                        .FirstOrDefaultAsync(x => x.Id == item.ProductLineItemId);
                     if (productInDb == null)
                     {
                         throw new Exception($"Product {item.ProductLineItemId} not found.");
                     }
+                    item.ProductName = productInDb.Product.Name;
+
+                    item.Cost = productInDb.Cost;
+                    item.DisplayPrice = productInDb.DisplayPrice;
+                    item.SubTotal = item.SalesPrice * item.Quantity;
+                    order.TotalAmount += item.SubTotal;
                     //  2. Check if we have enough stock
                     if (productInDb.Quantity < item.Quantity)
                     {
