@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using POS_System.Data;
 
@@ -11,9 +12,11 @@ using POS_System.Data;
 namespace POS_System.Migrations
 {
     [DbContext(typeof(PosSystemDbContext))]
-    partial class PosSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251128153447_AddQuantityColumnToLineItems")]
+    partial class AddQuantityColumnToLineItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,14 +146,14 @@ namespace POS_System.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double>("Cost")
+                        .HasColumnType("float");
 
-                    b.Property<decimal>("DiscountedPrice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double>("DiscountedPrice")
+                        .HasColumnType("float");
 
-                    b.Property<decimal>("DisplayPrice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double>("DisplayPrice")
+                        .HasColumnType("float");
 
                     b.Property<string>("ProductId")
                         .IsRequired()

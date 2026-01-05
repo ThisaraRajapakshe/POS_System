@@ -44,7 +44,13 @@ namespace POS_System.Mapping
                 .ForMember(dest => dest.ExpiresAt, opt => opt.Ignore())
                 .ForMember(dest => dest.Roles, opt => opt.Ignore());
 
-
+            // Order Mappings
+            CreateMap<OrderItem, OrderItemResponseDto>();
+            CreateMap<Order, OrderResponseDto>()
+                .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
+            CreateMap<CreateOrderDto, Order>().ReverseMap();
+            // Add this line inside your constructor:
+            CreateMap<OrderItemDto, OrderItem>();
         }
     }
 }

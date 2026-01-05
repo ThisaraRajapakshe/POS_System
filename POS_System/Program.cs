@@ -76,6 +76,8 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IOrderRepository,  OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderServise>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<AutoMapperProfiles>());
@@ -139,7 +141,7 @@ builder.Services.AddAuthentication(options =>
             //RoleClaimType = "role"
 
             // Specify which claim to use for the user's name
-            NameClaimType = ClaimTypes.NameIdentifier,
+            NameClaimType = ClaimTypes.Name,
             // Specify which claim to use for roles
             RoleClaimType = ClaimTypes.Role
         };
