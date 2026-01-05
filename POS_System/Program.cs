@@ -60,10 +60,20 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // DB contexts (keep your connection strings in appsettings / user-secrets)
+
 builder.Services.AddDbContext<PosSystemDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("PosSystemConnectionString")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PosSystemConnectionString")));
 builder.Services.AddDbContext<PosSystemAuthDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("PosSystemAuthConnectionString")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PosSystemAuthConnectionString")));
+
+
+// Temporally Hardcoding connection strings for easier testing
+//var myConnectionString = "postgresql://postgres.fsisblinjrvthaxwsnek:1V8Qaa54FoiNXgxE@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres";
+
+//builder.Services.AddDbContext<PosSystemDbContext>(options =>
+//    options.UseNpgsql(myConnectionString));
+//builder.Services.AddDbContext<PosSystemAuthDbContext>(options =>
+//    options.UseNpgsql(myConnectionString));
 
 
 
