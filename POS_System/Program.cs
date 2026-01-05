@@ -98,7 +98,10 @@ var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", p => p
-        .WithOrigins("http://localhost:4200")
+        .WithOrigins(
+            "http://localhost:4200",
+            "https://pos-frontend-murex.vercel.app"
+        )
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
@@ -201,15 +204,14 @@ builder.Services.ConfigureApplicationCookie(options =>
 // --- Build app -------------------------------------------------------------
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
+// Always use swagger
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS System API v1");
         c.RoutePrefix = "swagger"; // swagger at site root in dev
     });
-}
+
 
 app.UseHttpsRedirection();
 // 1. First, enable routing.
