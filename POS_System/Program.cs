@@ -62,9 +62,27 @@ builder.Services.AddSwaggerGen(c =>
 // DB contexts (keep your connection strings in appsettings / user-secrets)
 
 builder.Services.AddDbContext<PosSystemDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("PosSystemConnectionString")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PosSystemConnectionString"),
+        npgsqlOptions =>
+            {
+                // Retry up to 5 times if connection drops
+                npgsqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(10),
+                    errorCodesToAdd: null
+                );
+            }));
 builder.Services.AddDbContext<PosSystemAuthDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("PosSystemAuthConnectionString")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PosSystemAuthConnectionString"),
+        npgsqlOptions =>
+        {
+            // Retry up to 5 times if connection drops
+            npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorCodesToAdd: null
+            );
+        }));
 
 
 // Temporally Hardcoding connection strings for easier testing
