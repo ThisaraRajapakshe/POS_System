@@ -62,37 +62,9 @@ builder.Services.AddSwaggerGen(c =>
 // DB contexts (keep your connection strings in appsettings / user-secrets)
 
 builder.Services.AddDbContext<PosSystemDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("PosSystemConnectionString"),
-        npgsqlOptions =>
-            {
-                // Retry up to 5 times if connection drops
-                npgsqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 5,
-                    maxRetryDelay: TimeSpan.FromSeconds(10),
-                    errorCodesToAdd: null
-                );
-            }));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PosSystemConnectionString")));
 builder.Services.AddDbContext<PosSystemAuthDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("PosSystemAuthConnectionString"),
-        npgsqlOptions =>
-        {
-            // Retry up to 5 times if connection drops
-            npgsqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(10),
-                errorCodesToAdd: null
-            );
-        }));
-
-
-// Temporally Hardcoding connection strings for easier testing
-//var myConnectionString = "postgresql://postgres.fsisblinjrvthaxwsnek:1V8Qaa54FoiNXgxE@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres";
-
-//builder.Services.AddDbContext<PosSystemDbContext>(options =>
-//    options.UseNpgsql(myConnectionString));
-//builder.Services.AddDbContext<PosSystemAuthDbContext>(options =>
-//    options.UseNpgsql(myConnectionString));
-
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PosSystemAuthConnectionString")));
 
 
 // App services / repos
@@ -273,6 +245,30 @@ app.MapGet("/debug/routes", (EndpointDataSource eds) =>
 
 // Seed roles / admin (your existing method)
 await SeedRolesAndAdminAsync(app);
+
+// === AUTO-MIGRATION CODE START ===
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // Get your database context
+        var context = services.GetRequiredService<PosSystemDbContext>();
+
+        // This runs the migrations (creates tables) automatically!
+        context.Database.Migrate();
+
+        // If you have a separate Auth context, uncomment the lines below:
+        var authContext = services.GetRequiredService<PosSystemAuthDbContext>();
+        authContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
+}
+// === AUTO-MIGRATION CODE END ===
 
 app.Run();
 
