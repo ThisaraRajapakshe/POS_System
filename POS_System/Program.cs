@@ -246,6 +246,30 @@ app.MapGet("/debug/routes", (EndpointDataSource eds) =>
 // Seed roles / admin (your existing method)
 await SeedRolesAndAdminAsync(app);
 
+// === AUTO-MIGRATION CODE START ===
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // Get your database context
+        var context = services.GetRequiredService<PosSystemDbContext>();
+
+        // This runs the migrations (creates tables) automatically!
+        context.Database.Migrate();
+
+        // If you have a separate Auth context, uncomment the lines below:
+        var authContext = services.GetRequiredService<PosSystemAuthDbContext>();
+        authContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
+}
+// === AUTO-MIGRATION CODE END ===
+
 app.Run();
 
 // ----------------- Seed roles helper -------------------
