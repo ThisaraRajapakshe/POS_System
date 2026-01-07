@@ -243,8 +243,6 @@ app.MapGet("/debug/routes", (EndpointDataSource eds) =>
     return Results.Text(string.Join(Environment.NewLine, routes));
 }).AllowAnonymous();
 
-// Seed roles / admin (your existing method)
-await SeedRolesAndAdminAsync(app);
 
 // === AUTO-MIGRATION CODE START ===
 using (var scope = app.Services.CreateScope())
@@ -269,6 +267,9 @@ using (var scope = app.Services.CreateScope())
     }
 }
 // === AUTO-MIGRATION CODE END ===
+
+// Seed roles / admin (your existing method)
+await SeedRolesAndAdminAsync(app);
 
 app.Run();
 
