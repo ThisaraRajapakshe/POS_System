@@ -102,7 +102,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp", p => p
         .WithOrigins(
             "http://localhost:4200",
-            "https://pos-frontend-murex.vercel.app"
+            "https://pos-frontend-murex.vercel.app",
+            "https://pos-frontend-gw7lylpi1-thisararajapakshe2020-gmailcoms-projects.vercel.app"
         )
         .AllowAnyHeader()
         .AllowAnyMethod());
