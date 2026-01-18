@@ -145,7 +145,7 @@ namespace POS_System.Controllers
 
         [HttpGet("profile")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetProfile()
+        public async Task<ActionResult<UserProfileDto>> GetProfile()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             
@@ -163,22 +163,22 @@ namespace POS_System.Controllers
 
             var roles = await _authService.GetUserRolesAsync(userId);
 
-            var profile = new
+            var profileDto = new UserProfileDto
             {
-                user.Id,
-                user.UserName,
-                user.Email,
-                user.FullName,
-                user.BranchId,
-                user.BranchName,
-                user.EmployeeId,
-                user.IsActive,
-                user.CreatedAt,
-                user.LastLoginAt,
-                Roles = roles
+                Id = user.Id,
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                FullName = user.FullName ?? string.Empty,
+                BranchId = user.BranchId ?? string.Empty,
+                BranchName = user.BranchName ?? string.Empty,
+                EmployeeId = user.EmployeeId,
+                IsActive = user.IsActive,
+                CreatedAt = user.CreatedAt,
+                LastLoginAt = user.LastLoginAt,
+                Roles = [.. roles ?? []]
             };
 
-            return Ok(profile);
+            return Ok(profileDto);
         }
 
         [HttpPost("assign-role")]
