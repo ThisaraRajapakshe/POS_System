@@ -102,7 +102,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp", p => p
         .WithOrigins(
             "http://localhost:4200",
-            "https://pos-frontend-murex.vercel.app"
+            "https://pos-frontend-murex.vercel.app",
+            "https://pos-frontend-gw7lylpi1-thisararajapakshe2020-gmailcoms-projects.vercel.app"
         )
         .AllowAnyHeader()
         .AllowAnyMethod());
@@ -243,8 +244,6 @@ app.MapGet("/debug/routes", (EndpointDataSource eds) =>
     return Results.Text(string.Join(Environment.NewLine, routes));
 }).AllowAnonymous();
 
-// Seed roles / admin (your existing method)
-await SeedRolesAndAdminAsync(app);
 
 // === AUTO-MIGRATION CODE START ===
 using (var scope = app.Services.CreateScope())
@@ -269,6 +268,9 @@ using (var scope = app.Services.CreateScope())
     }
 }
 // === AUTO-MIGRATION CODE END ===
+
+// Seed roles / admin (your existing method)
+await SeedRolesAndAdminAsync(app);
 
 app.Run();
 
