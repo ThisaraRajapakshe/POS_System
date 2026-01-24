@@ -1,132 +1,167 @@
-
 # 💻 POS System Backend API
 
-This repository contains the backend RESTful API for the Point-of-Sale (POS) System. It is built using **.NET 8** and **C\#**, and it serves as the central data and business logic hub for the entire application.
+This repository contains the backend RESTful API for the Point-of-Sale (POS) System. It is built using **.NET 8**, **C#**, and **Docker**, serving as the central data and business logic hub for the entire application.
 
 The API is responsible for:
 
-  * Secure user authentication and role-based authorization using **JWT**.
-  * Managing the database schema via **Entity Framework Core**.
-  * Processing all business logic for sales, inventory, and catalog management.
+* 🔐 **Security:** Secure user authentication and role-based authorization using **JWT**.
+* 🗄️ **Data:** Managing the database schema via **Entity Framework Core**.
+* 💰 **Sales:** Processing sales transactions, calculating totals, and managing order history.
+* 📦 **Inventory:** Managing products, categories, and stock levels.
 
-### Related Project
+#### 🌐 Live Demo
 
-  * **Frontend Repository:** [POS-Frontend UI (Angular)](https://github.com/ThisaraRajapakshe/POS-Frontend)
-      * **Note:** This API must be running for the frontend application to function correctly.
+The API is currently hosted live on **Microsoft Azure**.
 
------
+* **Swagger UI:** **[Click here to test the Live API](https://thisara-pos-api-dddch9fhgjgka3ag.southeastasia-01.azurewebsites.net/swagger/index.html)**
+
+
+#### Related Project
+
+* **Frontend Repository:** [POS-Frontend UI (Angular)](https://pos-frontend-murex.vercel.app/login)
+
+---
 
 ## 🛠️ Technology Stack
 
 | Component | Technology | Description |
-| :--- | :--- | :--- |
-| **Framework** | **.NET 8** | The core runtime and framework for building the API. |
-| **Language** | **C\# 12** | The modern, object-oriented language used for all logic. |
-| **API** | **ASP.NET Core 8** | Used for building the RESTful API endpoints. |
-| **Database ORM** | **Entity Framework Core 8** | Manages the database (models, migrations, queries). |
-| **Database** | **SQL Server** | The relational database storing all application data. |
-| **Authentication** | **ASP.NET Identity** | Manages user accounts, passwords, and roles. |
-| **Authorization** | **JWT Bearer Tokens** | Secures API endpoints using industry-standard JSON Web Tokens. |
-| **API Docs** | **Swagger (OpenAPI)** | Provides interactive API documentation and testing. |
+| --- | --- | --- |
+| **Cloud Hosting** | **Microsoft Azure** | Application hosted on Azure App Service / Container Apps. |
+| **Framework** | .NET 8 | The core runtime and framework for building the API. |
+| **Containerization** | Docker | Used for containerizing the API and Database for consistent deployment. |
+| **Database** | SQL Server | Azure SQL Database (Prod) / SQL Server Docker (Dev). |
+| **API** | ASP.NET Core 8 | Used for building the RESTful API endpoints. |
+| **ORM** | Entity Framework Core 8 | Manages database models, migrations, and queries. |
+| **Auth** | ASP.NET Identity + JWT | Handles user management and API security. |
+| **Testing** | xUnit + Moq | Comprehensive Unit Testing suite. |
+| **Docs** | Swagger (OpenAPI) | Interactive API documentation. |
 
------
+---
 
 ## 🚀 Getting Started
 
-Follow these instructions to get the backend API running on your local machine for development and testing.
+You can run this project either **Locally** (using the .NET CLI) or inside a **Docker Container**.
 
 ### Prerequisites
 
-You must have the following tools installed on your local machine:
+* [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+* [Docker Desktop](https://www.docker.com/products/docker-desktop)
 
-  * [.NET 8 SDK](https://dotnet.microsoft.com/download)
-  * **SQL Server** (e.g., [SQL Server Express](https://www.microsoft.com/sql-server/sql-server-downloads) or [Developer Edition](https://www.microsoft.com/sql-server/sql-server-downloads))
-  * An API testing tool like [Postman](https://www.postman.com/) (optional, as Swagger is built-in)
+---
 
-### 1\. Configure the Database Connection
+### Option 1: Running Locally (Development Profile)
 
-The application needs to know where to find your SQL Server instance.
+#### 1. Configure the Database
 
-1.  Open the `appsettings.Development.json` file.
-2.  Find the `ConnectionStrings` section.
-3.  Update the `DefaultConnection` value to point to your local SQL Server instance. It should look something like this:
+Ensure your SQL Server (Docker container or Local instance) is running. Update `appsettings.Development.json` if necessary.
 
-<!-- end list -->
+#### 2. Apply Migrations
 
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=PosDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=true"
-}
-```
-
-### 2\. Set Up the Database (EF Core Migrations)
-
-This command will read all the C\# model configurations from Entity Framework Core and automatically create the database and all its tables for you.
-
-1.  Open a terminal in the root of the project directory.
-2.  Run the following command:
-
-<!-- end list -->
+Create the database schema:
 
 ```bash
 dotnet ef database update
+
 ```
 
-*(If you get an error, you may need to install the EF Core tool first by running: `dotnet tool install --global dotnet-ef`)*
-
-### 3\. Run the Application
-
-Execute the application from the root directory:
+#### 3. Run the API
 
 ```bash
-dotnet run
+dotnet run --launch-profile "LocalDev"
+
 ```
 
-The API will start and listen on the configured ports (e.g., `https://localhost:7001` and `http://localhost:5001`).
+The API will start at: **`http://localhost:5050`**
 
------
+---
 
-## 🔑 API & Security
+### Option 2: Running with Docker 🐳
 
-### API Endpoint Testing (Swagger)
+This project includes a `Dockerfile` for containerized deployment.
 
-Once the application is running, the **Swagger UI** is the easiest way to explore and test all available endpoints.
+#### 1. Build the Image
 
-Navigate to: **`https://localhost:7001/swagger/index.html`**
+Open a terminal in the root directory and run:
 
-You will see a complete, interactive list of all API endpoints, their required parameters, and example responses.
+```bash
+docker build -t pos-backend .
 
-### Authentication (JWT)
+```
 
-This API is secured using JSON Web Tokens (JWT). All requests to protected endpoints must include a valid Bearer Token in the `Authorization` header.
+#### 2. Run the Container
 
-**To get a token for testing in Swagger:**
+```bash
+docker run -d -p 8080:8080 --name pos-api pos-backend
 
-1.  Expand the `/api/Auth/login` endpoint.
-2.  Click "Try it out" and provide the credentials for a user in your database (you may need to register one first or seed the database).
-3.  Execute the request. The response body will contain an `accessToken`.
-4.  Copy this token.
-5.  At the top right of the Swagger page, click the **"Authorize"** button.
-6.  In the popup, paste the token into the `Value` box (prefixed with ` Bearer  `) and click "Authorize".
-7.  You can now test all the locked (🔒) endpoints.
+```
 
-### Role-Based Authorization (RBAC)
+* The API will be accessible at: **`http://localhost:8080`**
+* *Note: Ensure your API container can talk to your SQL Server container (usually via a Docker Network).*
 
-This API uses role-based authorization to restrict access to sensitive operations.
+---
 
-  * Endpoints are decorated with attributes like `[Authorize(Roles = "Admin")]` or `[Authorize(Roles = "Cashier")]`.
-  * This ensures that only users with the correct role (as defined in their JWT) can access specific resources. For example, a "Cashier" cannot access admin-only endpoints like `/api/Users`.
+## 🧪 Running Tests
 
-**To check if RBAC is working:**
+This project enforces code quality with a full Unit Test suite covering Services, Controllers, and Auth logic.
 
-1.  Log in as a user with the "Cashier" role and get their token.
-2.  Authorize using that token in Swagger.
-3.  Attempt to call an Admin-only endpoint (e.g., `GET /api/Users`).
-4.  You should receive a **`403 Forbidden`** response, which confirms your security is working correctly.
+To execute the tests:
 
------
+1. Navigate to the Test project:
+```bash
+cd POS.Tests
+
+```
+
+
+2. Run the tests:
+```bash
+dotnet test
+
+```
+
+
+
+---
+
+## 🔑 API Documentation (Swagger)
+
+The Swagger UI provides interactive documentation to test endpoints.
+
+* **Live (Azure):** `https://<your-app>.azurewebsites.net/swagger`
+* **Local:** `http://localhost:5050/swagger/index.html`
+* **Docker:** `http://localhost:8080/swagger/index.html`
+
+### Authentication Flow
+
+Most endpoints are protected (🔒). To test them:
+
+1. Use `/api/Auth/login` to get an **AccessToken**.
+2. Click **Authorize** at the top right of Swagger.
+3. Enter `Bearer <your-token>`.
+
+
+#### 🔐 Demo Credentials
+
+The application database is seeded with the following default accounts for testing purposes:
+
+| Role | Username | Password | Access Level |
+| --- | --- | --- | --- |
+| **Admin** | `Admin` | `Password1234!` | Full Access (Users, Inventory, Sales) |
+| **Manager** | `Manager` | `Password1234!` | Inventory Management & Reports |
+| **Cashier** | `Cashier` | `Password1234!` | Sales & Order Processing |
+
+
+---
+
+### Roles
+
+* **Admin:** Full access to User Management, Inventory, and Sales.
+* **Manager:** Manage Inventory and view Reports.
+* **Cashier/StockClerk:** Create Orders and update specific items.
+
+---
 
 ## 👤 Developer
 
-  * **Author:** RKD Thisara Sandeep
-  * **Version Control:** Managed with Git and hosted on GitHub.
+* **Author:** RKD Thisara Sandeep
+* **Version Control:** Managed with Git and hosted on GitHub.
