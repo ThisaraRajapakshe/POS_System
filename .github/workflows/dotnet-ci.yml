@@ -1,0 +1,59 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: ["master"] # Only deploy on main branch
+  pull_request:
+    branches: ["master"] # Run tests on PRs, but don't deploy
+
+jobs:
+  # JOB 1: BUILD & TEST
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test --no-build --configuration Release --verbosity normal
+
+      - name: Publish (Prepare for Deployment)
+        run: dotnet publish ./POS_System/POS_System.csproj -c Release -o ./publish
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-app
+          path: ./publish
+
+  # JOB 2: DEPLOY TO AZURE (Runs only if Build/Test passes)
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-test # <--- Wait for tests!
+    if: github.event_name == 'push' # <--- Don't deploy on PRs, only on Merge to Main
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-app
+          path: ./publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "thisara-pos-api"
+          slot-name: "production"
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
