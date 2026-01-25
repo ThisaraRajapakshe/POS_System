@@ -2,9 +2,9 @@ name: Backend CI/CD
 
 on:
   push:
-    branches: ["main"] # Only deploy on main branch
+    branches: ["master"] # Only deploy on main branch
   pull_request:
-    branches: ["main"] # Run tests on PRs, but don't deploy
+    branches: ["master"] # Run tests on PRs, but don't deploy
 
 jobs:
   # JOB 1: BUILD & TEST
