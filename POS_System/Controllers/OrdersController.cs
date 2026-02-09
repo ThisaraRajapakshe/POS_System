@@ -34,12 +34,12 @@ namespace POS_System.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto orderDto)
         {
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            string cashierName = User.Identity.Name;
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            string cashierName = User.FindFirstValue(ClaimTypes.Name) ?? User.Identity?.Name ?? string.Empty;
 
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(cashierName))
             {
-                return Unauthorized("User Id Not Found in Token");
+                return Unauthorized(new { error = "User Id Not Found in Token" });
             }
             var result = await _orderService.CreateOrderAsync(orderDto, userId, cashierName);
             return Ok (result);
