@@ -2,7 +2,7 @@
 using POS_System.Models.Domain;
 using POS_System.Models.Dto;
 using POS_System.Repositories;
-using POS_System.Repositories.Implementation;
+using System.Security.Claims;
 
 namespace POS_System.ApplicationServices.Implementation
 {
