@@ -6,6 +6,6 @@ namespace POS_System.Repositories
     {
         Task<Order> CreateOrderAsync(Order order);
         Task<List<Order>> GetAllOrdersAsync();
-        Task<Order> FindByIdAsync(string id);
+        Task<Order?> FindByIdAsync(string id);
     }
 }

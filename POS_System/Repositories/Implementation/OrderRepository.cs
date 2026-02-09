@@ -59,7 +59,7 @@ namespace POS_System.Repositories.Implementation
             
         }
 
-        public async Task<Order> FindByIdAsync(string id)
+        public async Task<Order?> FindByIdAsync(string id)
         {
             return await _context.Orders.FirstOrDefaultAsync(x => x.Id == id);
         }
