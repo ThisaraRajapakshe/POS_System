@@ -23,7 +23,7 @@ namespace POS_System.ApplicationServices.Implementation
             order.Id = Guid.NewGuid().ToString();
             foreach (var item in order.OrderItems)
             {
-                item.OderId = order.Id;
+                item.OrderId = order.Id;
                 item.Id = Guid.NewGuid().ToString();
             }
             order.UserId = userId;
