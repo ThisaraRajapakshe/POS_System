@@ -49,10 +49,14 @@ namespace POS_System.ApplicationServices.Implementation
 
         public async Task<List<DailyReportDto>> GetWeeklyReportAsync(LocalDate weekStart, string timeZoneId)
         {
-            var (utcStart, utcEnd) = _timeZoneHelper.GetUtcRange(weekStart.PlusDays(7), timeZoneId);
-
-            var items = await _reportRepository.GetOrderItemsForUtcRangeAsync(utcStart, utcEnd);
             var zone = DateTimeZoneProviders.Tzdb[timeZoneId];
+
+            // UTC start of the first day (Monday 00:00 local)
+            var (weekUtcStart, _) = _timeZoneHelper.GetUtcRange(weekStart, timeZoneId);
+            // UTC start of the day after the last day (next Monday 00:00) → exclusive end
+            var (_, weekUtcEnd) = _timeZoneHelper.GetUtcRange(weekStart.PlusDays(7), timeZoneId);
+
+            var items = await _reportRepository.GetOrderItemsForUtcRangeAsync(weekUtcStart, weekUtcEnd);
 
             // Group by local date (converting each OrderDate to local date)
             var grouped = items.GroupBy(item =>
