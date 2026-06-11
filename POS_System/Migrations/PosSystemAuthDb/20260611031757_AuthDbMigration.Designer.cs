@@ -12,8 +12,8 @@ using POS_System.Data;
 namespace POS_System.Migrations.PosSystemAuthDb
 {
     [DbContext(typeof(PosSystemAuthDbContext))]
-    [Migration("20260107074946_InitialAuth")]
-    partial class InitialAuth
+    [Migration("20260611031757_AuthDbMigration")]
+    partial class AuthDbMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
