@@ -23,5 +23,17 @@ namespace POS_System.Controllers
             var report = await _reportService.GetDailyReportAsync(localDate, timeZoneId);
             return Ok(report);
         }
+
+        [HttpGet("weekly")]
+        public async Task<ActionResult<List<DailyReportDto>>> GetWeekly(
+         [FromQuery] DateTime weekStart,       // Monday of the week (local date)
+         [FromQuery] string timeZoneId = "UTC")
+        {
+            // Convert DateTime to NodaTime LocalDate (ignore time part)
+            var localWeekStart = LocalDate.FromDateTime(weekStart.Date);
+
+            var reports = await _reportService.GetWeeklyReportAsync(localWeekStart, timeZoneId);
+            return Ok(reports);
+        }
     }
 }
