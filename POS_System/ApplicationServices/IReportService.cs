@@ -8,5 +8,6 @@ namespace POS_System.ApplicationServices
         Task<DailyReportDto> GetDailyReportAsync(LocalDate localDate, string timeZoneId);
         Task<List<DailyReportDto>> GetWeeklyReportAsync(LocalDate weekStart, string timeZoneId);
         Task<ReportSummaryDto> GetMonthlyReportAsync(int year, int month, string timeZoneId);
+        Task<MonthlyReportDto> GetMonthlyReportWithDailyAsync(int year, int month, string timeZoneId);
     }
 }

@@ -112,5 +112,50 @@ namespace POS_System.ApplicationServices.Implementation
                 .Take(10)
                 .ToList();
         }
+
+        public async Task<MonthlyReportDto> GetMonthlyReportWithDailyAsync(int year, int month, string timeZoneId)
+        {
+            var zone = DateTimeZoneProviders.Tzdb[timeZoneId];
+            LocalDate firstDay = new LocalDate(year, month, 1);
+            LocalDate lastDay = firstDay.PlusMonths(1).PlusDays(-1);
+
+            // UTC range for the whole month (from start of first day to start of first day of next month)
+            var (monthUtcStart, _) = _timeZoneHelper.GetUtcRange(firstDay, timeZoneId);
+            var (_, monthUtcEnd) = _timeZoneHelper.GetUtcRange(lastDay.PlusDays(1), timeZoneId);
+
+            var items = await _reportRepository.GetOrderItemsForUtcRangeAsync(monthUtcStart, monthUtcEnd);
+            int totalOrders = await _reportRepository.GetDistinctOrderCountAsync(monthUtcStart, monthUtcEnd);
+
+            // Group all items by local date (just like the weekly method)
+            var grouped = items.GroupBy(item =>
+            {
+                var instant = Instant.FromDateTimeUtc(item.Order.OrderDate);
+                return instant.InZone(zone).Date;
+            }).OrderBy(g => g.Key);
+
+            var dailyReports = new List<DailyReportDto>();
+            foreach (var group in grouped)
+            {
+                var dayItems = group.ToList();
+                var dayOrders = dayItems.Select(i => i.OrderId).Distinct().Count();
+                dailyReports.Add(new DailyReportDto
+                {
+                    Date = group.Key.ToDateTimeUnspecified(),
+                    Summary = BuildSummary(dayItems, dayOrders),
+                    TopSellingItems = BuildTopItems(dayItems)
+                });
+            }
+
+            // Build the full monthly summary (using all items)
+            var monthlySummary = BuildSummary(items, totalOrders);
+
+            return new MonthlyReportDto
+            {
+                Year = year,
+                Month = month,
+                MonthlySummary = monthlySummary,
+                DailyReports = dailyReports
+            };
+        }
     }
 }
