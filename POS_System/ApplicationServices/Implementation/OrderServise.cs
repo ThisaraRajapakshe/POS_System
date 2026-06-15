@@ -28,7 +28,7 @@ namespace POS_System.ApplicationServices.Implementation
             }
             order.UserId = userId;
             order.CashierName = cashierName;    
-            order.OrderDate = DateTime.Now;
+            order.OrderDate = DateTime.UtcNow;
             order.Status = createOrderDto.IsPending ? "Pending" : "Completed";
             order.OrderNumber = $"INV-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}";
 
