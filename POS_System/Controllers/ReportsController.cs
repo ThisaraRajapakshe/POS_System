@@ -44,5 +44,14 @@ namespace POS_System.Controllers
             var report = await _reportService.GetMonthlyReportWithDailyAsync(year, month, timeZoneId);
             return Ok(report);
         }
+        [HttpGet("monthly")]
+        public async Task<ActionResult<MonthlyReportDto>> GetMonthlylyReportAsync(
+           [FromQuery] int year,
+           [FromQuery] int month,
+           [FromQuery] string timeZoneId = "UTC")
+        {
+            var report = await _reportService.GetMonthlyReportAsync(year, month, timeZoneId);
+            return Ok(report);
+        }
     }
 }
