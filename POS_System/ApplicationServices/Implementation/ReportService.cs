@@ -58,10 +58,10 @@ namespace POS_System.ApplicationServices.Implementation
 
             var items = await _reportRepository.GetOrderItemsForUtcRangeAsync(weekUtcStart, weekUtcEnd);
 
-            // Group by local date (converting each OrderDate to local date)
             var grouped = items.GroupBy(item =>
             {
-                var instant = Instant.FromDateTimeUtc(item.Order.OrderDate);
+                var dto = new DateTimeOffset(item.Order.OrderDate, TimeSpan.Zero); // treat as UTC
+                var instant = Instant.FromDateTimeOffset(dto);
                 return instant.InZone(zone).Date;
             }).OrderBy(g => g.Key);
 
