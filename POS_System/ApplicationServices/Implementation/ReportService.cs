@@ -129,7 +129,8 @@ namespace POS_System.ApplicationServices.Implementation
             // Group all items by local date (just like the weekly method)
             var grouped = items.GroupBy(item =>
             {
-                var instant = Instant.FromDateTimeUtc(item.Order.OrderDate);
+                var dto = new DateTimeOffset(item.Order.OrderDate, TimeSpan.Zero);
+                var instant = Instant.FromDateTimeOffset(dto);
                 return instant.InZone(zone).Date;
             }).OrderBy(g => g.Key);
 
