@@ -23,12 +23,12 @@ namespace POS_System.ApplicationServices.Implementation
             order.Id = Guid.NewGuid().ToString();
             foreach (var item in order.OrderItems)
             {
-                item.OderId = order.Id;
+                item.OrderId = order.Id;
                 item.Id = Guid.NewGuid().ToString();
             }
             order.UserId = userId;
             order.CashierName = cashierName;    
-            order.OrderDate = DateTime.Now;
+            order.OrderDate = DateTime.UtcNow;
             order.Status = createOrderDto.IsPending ? "Pending" : "Completed";
             order.OrderNumber = $"INV-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}";
 

@@ -78,6 +78,9 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOrderRepository,  OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderServise>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddSingleton<TimeZoneHelper>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<AutoMapperProfiles>());

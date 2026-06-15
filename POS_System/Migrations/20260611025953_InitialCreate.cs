@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace POS_System.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSchema : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -65,8 +65,7 @@ namespace POS_System.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    OderId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OrderId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    OrderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProductLineItemId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DisplayPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -82,7 +81,8 @@ namespace POS_System.Migrations
                         name: "FK_OrderItems_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

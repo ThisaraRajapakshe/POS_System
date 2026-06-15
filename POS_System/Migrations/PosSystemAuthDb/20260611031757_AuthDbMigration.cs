@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace POS_System.Migrations.PosSystemAuthDb
 {
     /// <inheritdoc />
-    public partial class InitialAuth : Migration
+    public partial class AuthDbMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -12,8 +12,8 @@ using POS_System.Data;
 namespace POS_System.Migrations
 {
     [DbContext(typeof(PosSystemDbContext))]
-    [Migration("20260107074836_InitialSchema")]
-    partial class InitialSchema
+    [Migration("20260611025953_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,11 +86,8 @@ namespace POS_System.Migrations
                     b.Property<decimal>("DisplayPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("OderId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("OrderId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProductLineItemId")
@@ -173,7 +170,9 @@ namespace POS_System.Migrations
                 {
                     b.HasOne("POS_System.Models.Domain.Order", "Order")
                         .WithMany("OrderItems")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Order");
                 });
