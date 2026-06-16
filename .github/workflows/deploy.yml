@@ -20,8 +20,8 @@ jobs:
       - name: Build and push Backend
         uses: docker/build-push-action@v5
         with:
-          context: .  # Path to your backend Dockerfile (root of this repo)
-          file: ./Dockerfile
+          context: ../../POS_System
+          file: ../../POS_System/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/pos-backend:latest
 
