@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using POS_System.ApplicationServices;
+using POS_System.Models.Dto;
 
 namespace POS_System.Controllers
 {
@@ -16,10 +17,10 @@ namespace POS_System.Controllers
         }
 
         [HttpGet("admin")]
-        public async Task<IActionResult> GetAdminDashboard()
+        public async Task<ActionResult<AdminDashboardDto>> GetAdminDashboard()
         {
             // Implementation for admin dashboard
-            var adminDashboard = await _dashboardsService.GetAdminDashboardAsync();
+            AdminDashboardDto adminDashboard = await _dashboardsService.GetAdminDashboardAsync();
             return Ok(adminDashboard);
         }
     }

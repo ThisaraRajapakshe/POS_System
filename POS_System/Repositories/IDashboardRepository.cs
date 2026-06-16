@@ -2,5 +2,6 @@
 {
     public interface IDashboardRepository
     {
+        Task<decimal> GetTotalRevenue();
     }
 }

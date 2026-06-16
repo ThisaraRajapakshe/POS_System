@@ -1,6 +1,6 @@
 ﻿namespace POS_System.Models.Dto
 {
-    public class AdminDashboadDto
+    public class AdminDashboardDto
     {
         public decimal TotalRevenue { get; set; }
         public int OrdersToday { get; set; }

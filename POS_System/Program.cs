@@ -81,6 +81,8 @@ builder.Services.AddScoped<IOrderService, OrderServise>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddSingleton<TimeZoneHelper>();
+builder.Services.AddScoped<IDashboardsService, DashboardsService>();
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<AutoMapperProfiles>());
