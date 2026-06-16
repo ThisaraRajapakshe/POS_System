@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aa5d7977-6c62-449a-8a7a-35420c5a8f99</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<GenerateGitMetadata>false</GenerateGitMetadata>
   </PropertyGroup>
 
   <ItemGroup>

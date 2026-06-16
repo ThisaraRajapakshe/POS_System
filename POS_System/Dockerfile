@@ -16,12 +16,12 @@ COPY ["POS_System/POS_System.csproj", "POS_System/"]
 RUN dotnet restore "./POS_System/POS_System.csproj"
 COPY . .
 WORKDIR "/src/POS_System"
-RUN dotnet build "./POS_System.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./POS_System.csproj" -c $BUILD_CONFIGURATION -o /app/build /p:EnableSourceLink=false
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./POS_System.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./POS_System.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:EnableSourceLink=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
