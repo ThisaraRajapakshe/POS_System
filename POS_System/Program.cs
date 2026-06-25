@@ -216,8 +216,8 @@ var app = builder.Build();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS System API v1");
-        c.RoutePrefix = "swagger"; // swagger at site root in dev
+        c.SwaggerEndpoint("/api/swagger/v1/swagger.json", "POS System API v1");
+        c.RoutePrefix = "api/swagger"; // swagger at site root in dev
     });
 
 
