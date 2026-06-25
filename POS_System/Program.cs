@@ -213,14 +213,19 @@ builder.Services.ConfigureApplicationCookie(options =>
 var app = builder.Build();
 
 // Always use swagger
-    app.UseSwagger();
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+{
+    app.UseSwagger(c =>
+    {
+        c.RouteTemplate = "api/swagger/{documentName}/swagger.json";
+    });
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/api/swagger/v1/swagger.json", "POS System API v1");
         c.RoutePrefix = "api/swagger"; // swagger at site root in dev
     });
 
-
+}
 app.UseHttpsRedirection();
 // 1. First, enable routing.
 app.UseRouting();
