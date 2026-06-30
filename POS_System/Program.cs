@@ -107,7 +107,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp", p => p
         .WithOrigins(
             "http://localhost:4200",
-            "http://13.206.165.125"
+            "http://13.206.165.125",
+            "https://thisara.dev",
+            "https://www.thisara.dev"
+
         )
         .AllowAnyHeader()
         .AllowAnyMethod());
