@@ -102,16 +102,11 @@ var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
 //Console.WriteLine($"JWT Audience: {jwtSettings.Audience}");
 
 // CORS
+var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", p => p
-        .WithOrigins(
-            "http://localhost:4200",
-            "http://13.206.165.125",
-            "https://thisara.dev",
-            "https://www.thisara.dev"
-
-        )
+        .WithOrigins(origins)
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
