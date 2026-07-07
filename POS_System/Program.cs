@@ -102,16 +102,11 @@ var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
 //Console.WriteLine($"JWT Audience: {jwtSettings.Audience}");
 
 // CORS
+var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", p => p
-        .WithOrigins(
-            "http://localhost:4200",
-            "http://13.206.165.125",
-            "https://thisara.dev",
-            "https://www.thisara.dev"
-
-        )
+        .WithOrigins(origins)
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
@@ -308,26 +303,34 @@ static async Task SeedRolesAndAdminAsync(IHost host)
             await roleManager.CreateAsync(new ApplicationRole { Name = r.Name, Description = r.Description });
     }
 
-    var adminEmail = "admin@pos.local";
+    var defaultPassword = Environment.GetEnvironmentVariable("ADMIN_DEFAULT_PASSWORD") ??
+                              throw new Exception("ADMIN_DEFAULT_PASSWORD not set in environment!");
+    var adminEmail = Environment.GetEnvironmentVariable("ADMIN_EMAIL") ?? "admin@pos.local";
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
     if (adminUser == null)
     {
         adminUser = new ApplicationUser
         {
-            UserName = "admin",
+            UserName = "superadmin",
             Email = adminEmail,
-            FullName = "System Admin",
-            BranchId = "BRANCH_MAIN",
-            BranchName = "Main Branch",
+            FullName = "System Administrator",
+            BranchId = null,
+            BranchName = "System",
             EmailConfirmed = true,
-            IsActive = true
+            IsActive = true,
+            IsSuperAdmin = true
         };
-
-        var result = await userManager.CreateAsync(adminUser, "Admin@1234!");
+       
+        var result = await userManager.CreateAsync(adminUser, defaultPassword);
         if (result.Succeeded)
+        {
             await userManager.AddToRoleAsync(adminUser, "Admin");
+            Console.WriteLine("Super Admin created successfully!");
+        }
         else
+        {
             foreach (var err in result.Errors)
                 Console.WriteLine($"Error creating admin user: {err.Description}");
+        }
     }
 }

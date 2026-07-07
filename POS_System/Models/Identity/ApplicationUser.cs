@@ -16,6 +16,9 @@ namespace POS_System.Models.Identity
 
         // Soft disable + audit info
         public bool IsActive { get; set; } = true;
+
+        public bool IsSuperAdmin { get; set; } = false;
+
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
         public DateTimeOffset? LastLoginAt { get; set; }
     }
