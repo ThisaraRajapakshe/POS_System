@@ -38,7 +38,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            cd /home/ubuntu/app-v2
+            cd /home/ubuntu/app
             docker-compose -f docker-compose.prod.yml pull backend
             docker-compose -f docker-compose.prod.yml up -d --no-deps backend
             docker system prune -f
