@@ -1,7 +1,3 @@
-
----
-
-```markdown
 [![Backend CI/CD](https://github.com/ThisaraRajapakshe/POS_System/actions/workflows/dotnet-ci.yml/badge.svg)](https://github.com/ThisaraRajapakshe/POS_System/actions/workflows/dotnet-ci.yml)
 
 ---
@@ -146,7 +142,7 @@ The application database is seeded with the following default accounts for testi
 
 | Role | Username | Password | Access Level |
 | --- | --- | --- | --- |
-| **Super Admin** | `admin@pos.local` | `Admin@1234!` | Full System Access (All Branches) |
+| **Super Admin** | `superadmin` | `Admin@1234!` | Full System Access (All Branches) |
 | **Admin** | *Create via Super Admin* | *Set during creation* | Branch-specific Management |
 | **Manager** | *Create via Super Admin* | *Set during creation* | Inventory Management & Reports |
 | **Cashier** | *Create via Super Admin* | *Set during creation* | Sales & Order Processing |
@@ -168,9 +164,7 @@ POS_System/
 ├── Configurations/          # App configuration classes
 ├── Controllers/             # API endpoints
 ├── Data/                    # DbContext and migrations
-├── Extensions/              # Extension methods (DI, Swagger, etc.)
 ├── Helpers/                 # Utility classes
-├── Middlewares/             # Custom middleware (BranchActive, ExceptionHandling)
 ├── Models/                  # Domain entities, DTOs, Identity models
 ├── Repositories/            # Data access layer
 ├── POS.Tests/               # Unit tests (xUnit + Moq)
