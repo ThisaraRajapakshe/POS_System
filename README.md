@@ -1,4 +1,9 @@
+
+---
+
+```markdown
 [![Backend CI/CD](https://github.com/ThisaraRajapakshe/POS_System/actions/workflows/dotnet-ci.yml/badge.svg)](https://github.com/ThisaraRajapakshe/POS_System/actions/workflows/dotnet-ci.yml)
+
 ---
 
 # 💻 POS System Backend API
@@ -7,20 +12,17 @@ This repository contains the backend RESTful API for the Point-of-Sale (POS) Sys
 
 The API is responsible for:
 
-* 🔐 **Security:** Secure user authentication and role-based authorization using **JWT**.
-* 🗄️ **Data:** Managing the database schema via **Entity Framework Core**.
-* 💰 **Sales:** Processing sales transactions, calculating totals, and managing order history.
-* 📦 **Inventory:** Managing products, categories, and stock levels.
+- 🔐 **Security:** Secure user authentication and role-based authorization using **JWT**.
+- 🗄️ **Data:** Managing the database schema via **Entity Framework Core**.
+- 💰 **Sales:** Processing sales transactions, calculating totals, and managing order history.
+- 📦 **Inventory:** Managing products, categories, and stock levels.
 
 #### 🌐 Live Demo
 
-The API is currently hosted live on **Microsoft Azure**.
+The API is currently hosted live on **AWS Lightsail**.
 
-* **Swagger UI:** **[Click here to test the Live API](https://thisara-pos-api-dddch9fhgjgka3ag.southeastasia-01.azurewebsites.net/swagger/index.html)**
-
-#### Related Project
-
-* **Frontend Repository:** [POS-Frontend UI (Angular)](https://pos-frontend-murex.vercel.app/login)
+- **Swagger UI:** [Click here to test the Live API](https://www.thisara.dev/api/swagger/index.html)
+- **Frontend App:** [POS Frontend (Angular)](https://www.thisara.dev)
 
 ---
 
@@ -28,11 +30,11 @@ The API is currently hosted live on **Microsoft Azure**.
 
 | Component | Technology | Description |
 | --- | --- | --- |
-| **Cloud Hosting** | **Microsoft Azure** | Application hosted on Azure App Service. |
+| **Cloud Hosting** | **AWS Lightsail** | Application hosted on AWS Lightsail (EC2-based VPS). |
 | **CI/CD** | **GitHub Actions** | Automated Testing and Continuous Deployment pipeline. |
 | **Framework** | .NET 8 | The core runtime and framework for building the API. |
 | **Containerization** | Docker | Used for containerizing the API and Database. |
-| **Database** | SQL Server | Azure SQL Database (Prod) / SQL Server Docker (Dev). |
+| **Database** | SQL Server | SQL Server Express running in Docker container. |
 | **API** | ASP.NET Core 8 | Used for building the RESTful API endpoints. |
 | **ORM** | Entity Framework Core 8 | Manages database models, migrations, and queries. |
 | **Auth** | ASP.NET Identity + JWT | Handles user management and API security. |
@@ -45,13 +47,11 @@ The API is currently hosted live on **Microsoft Azure**.
 
 This project uses **GitHub Actions** for fully automated Continuous Integration and Deployment.
 
-* **Trigger:** Pushes to the `master` branch.
-* **Process:**
-1. **Build:** Compiles the .NET code to ensure no syntax errors.
-2. **Test:** Runs the full **xUnit** test suite.
-3. **Deploy:** If (and only if) tests pass, the code is automatically deployed to **Azure App Service**.
-
-
+- **Trigger:** Pushes to the `master` branch.
+- **Process:**
+  1. **Build:** Compiles the .NET code to ensure no syntax errors.
+  2. **Test:** Runs the full **xUnit** test suite.
+  3. **Deploy:** If (and only if) tests pass, the code is automatically deployed to **AWS Lightsail**.
 
 ---
 
@@ -61,8 +61,8 @@ You can run this project either **Locally** (using the .NET CLI) or inside a **D
 
 ### Prerequisites
 
-* [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-* [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
 
 ---
 
@@ -78,14 +78,12 @@ Create the database schema:
 
 ```bash
 dotnet ef database update
-
 ```
 
 #### 3. Run the API
 
 ```bash
 dotnet run --launch-profile "LocalDev"
-
 ```
 
 The API will start at: **`http://localhost:5050`**
@@ -94,26 +92,22 @@ The API will start at: **`http://localhost:5050`**
 
 ### Option 2: Running with Docker 🐳
 
-This project includes a `Dockerfile` for containerized deployment.
+This project includes a `Dockerfile` and `docker-compose.yml` for containerized deployment.
 
-#### 1. Build the Image
-
-Open a terminal in the root directory and run:
+#### 1. Run with Docker Compose
 
 ```bash
-docker build -t pos-backend .
-
+docker-compose -f docker-compose.local.yml up -d
 ```
 
-#### 2. Run the Container
+This will start:
+- **Backend API** on port `5000`
+- **SQL Server** on port `15000`
+- **Frontend** on port `4200`
 
-```bash
-docker run -d -p 8080:8080 --name pos-api pos-backend
+#### 2. Access the API
 
-```
-
-* The API will be accessible at: **`http://localhost:8080`**
-* *Note: Ensure your API container can talk to your SQL Server container (usually via a Docker Network).*
+- **Swagger UI:** `http://localhost:5000/api/swagger/index.html`
 
 ---
 
@@ -123,20 +117,10 @@ This project enforces code quality with a full Unit Test suite covering Services
 
 To execute the tests:
 
-1. Navigate to the Test project:
 ```bash
 cd POS.Tests
-
-```
-
-
-2. Run the tests:
-```bash
 dotnet test
-
 ```
-
-
 
 ---
 
@@ -144,9 +128,9 @@ dotnet test
 
 The Swagger UI provides interactive documentation to test endpoints.
 
-* **Live (Azure):** `https://thisara-pos-api-dddch9fhgjgka3ag.southeastasia-01.azurewebsites.net/swagger/index.html`
-* **Local:** `http://localhost:5050/swagger/index.html`
-* **Docker:** `http://localhost:8080/swagger/index.html`
+- **Live (AWS Lightsail):** `https://pos.thisara.dev/api/swagger/index.html`
+- **Local:** `http://localhost:5050/api/swagger/index.html`
+- **Docker:** `http://localhost:5000/api/swagger/index.html`
 
 ### Authentication Flow
 
@@ -162,19 +146,55 @@ The application database is seeded with the following default accounts for testi
 
 | Role | Username | Password | Access Level |
 | --- | --- | --- | --- |
-| **Admin** | `Admin` | `Password1234!` | Full Access (Users, Inventory, Sales) |
-| **Manager** | `Manager` | `Password1234!` | Inventory Management & Reports |
-| **Cashier** | `Cashier` | `Password1234!` | Sales & Order Processing |
+| **Super Admin** | `admin@pos.local` | `Admin@1234!` | Full System Access (All Branches) |
+| **Admin** | *Create via Super Admin* | *Set during creation* | Branch-specific Management |
+| **Manager** | *Create via Super Admin* | *Set during creation* | Inventory Management & Reports |
+| **Cashier** | *Create via Super Admin* | *Set during creation* | Sales & Order Processing |
 
 ### Roles
 
-* **Admin:** Full access to User Management, Inventory, and Sales.
-* **Manager:** Manage Inventory and view Reports.
-* **Cashier/StockClerk:** Create Orders and update specific items.
+- **Super Admin:** Full access to all branches, user management, and system settings.
+- **Admin:** Manage users, inventory, and sales within their assigned branch.
+- **Manager:** Manage inventory and view reports within their assigned branch.
+- **Cashier:** Create orders and process sales within their assigned branch.
+
+---
+
+## 📁 Project Structure
+
+```
+POS_System/
+├── ApplicationServices/     # Business logic layer (Services)
+├── Configurations/          # App configuration classes
+├── Controllers/             # API endpoints
+├── Data/                    # DbContext and migrations
+├── Extensions/              # Extension methods (DI, Swagger, etc.)
+├── Helpers/                 # Utility classes
+├── Middlewares/             # Custom middleware (BranchActive, ExceptionHandling)
+├── Models/                  # Domain entities, DTOs, Identity models
+├── Repositories/            # Data access layer
+├── POS.Tests/               # Unit tests (xUnit + Moq)
+└── Program.cs               # Application entry point
+```
 
 ---
 
 ## 👤 Developer
 
-* **Author:** RKD Thisara Sandeep
-* **Version Control:** Managed with Git and hosted on GitHub.
+- **Author:** RKD Thisara Sandeep
+- **GitHub:** [github.com/ThisaraRajapakshe](https://github.com/ThisaraRajapakshe)
+- **Portfolio:** [thisara.dev](https://thisara.dev)
+- **LinkedIn:** [linkedin.com/in/thisara-rajapakshe](https://linkedin.com/in/thisara-rajapakshe)
+
+---
+
+### 📄 License
+
+This project is open-source and available under the MIT License.
+
+---
+
+**⭐ If you find this project useful, please consider giving it a star!**
+```
+
+---
