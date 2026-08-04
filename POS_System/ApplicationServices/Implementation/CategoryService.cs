@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
 using POS_System.Models.Domain;
 using POS_System.Models.Dto;
 using POS_System.Repositories;
@@ -9,61 +10,101 @@ namespace POS_System.ApplicationServices.Implementation
     {
         private readonly IMapper mapper;
         private readonly ICategoryRepository repository;
+        private readonly ILogger<CategoryService> logger;
 
-        public CategoryService(IMapper mapper, ICategoryRepository repository)
+        public CategoryService(IMapper mapper, ICategoryRepository repository, ILogger<CategoryService> logger)
         {
             this.mapper = mapper;
             this.repository = repository;
+            this.logger = logger;
         }
 
         public Task<bool> DeleteCategory(string id)
         {
-            return repository.DeleteAsync(id);
+            try
+            {
+                return repository.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error deleting category with id {CategoryId}", id);
+                throw;
+            }
         }
 
         public async Task<List<CategoryDto>> GetCategories()
         {
-            var domainModel = await repository.GetAsync();
-            return mapper.Map<List<CategoryDto>>(domainModel);
+            try
+            {
+                var domainModel = await repository.GetAsync();
+                return mapper.Map<List<CategoryDto>>(domainModel);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting categories");
+                throw;
+            }
         }
 
         public async Task<CategoryDto?> GetCategory(string id)
         {
-            var domainModel = await repository.GetAsync(id);
-            if (domainModel == null)
+            try
             {
-                return null;
+                var domainModel = await repository.GetAsync(id);
+                if (domainModel == null)
+                {
+                    return null;
+                }
+                return mapper.Map<CategoryDto>(domainModel);
             }
-            return mapper.Map<CategoryDto>(domainModel);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting category with id {CategoryId}", id);
+                throw;
+            }
         }
 
         public async Task<CategoryDto> InsertCategory(CreateCategoryRequestDto createCategoryRequestDto)
         {
-            // Create domain entity via factory to enforce invariants
-            var domainModel = Category.Create(createCategoryRequestDto.Name);
-            domainModel = await repository.CreateAsync(domainModel);
-            var categoryDto = mapper.Map<CategoryDto>(domainModel);
-            return categoryDto;
+            try
+            {
+                var domainModel = Category.Create(createCategoryRequestDto.Name);
+                domainModel = await repository.CreateAsync(domainModel);
+                var categoryDto = mapper.Map<CategoryDto>(domainModel);
+                return categoryDto;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error inserting category: {Category}", createCategoryRequestDto);
+                throw;
+            }
         }
 
         public async Task<CategoryDto?> UpdateCategory(UpdateCategoryRequestDto updateCategoryRequestDto, string id)
         {
-            // Load existing domain entity and apply domain logic
-            var existing = await repository.GetAsync(id);
-            if (existing == null)
+            try
             {
-                return null;
+                var existing = await repository.GetAsync(id);
+                if (existing == null)
+                {
+                    return null;
+                }
+
+                existing.UpdateName(updateCategoryRequestDto.Name);
+
+                var updated = await repository.UpdateAsync(existing, id);
+                if (updated == null)
+                {
+                    return null;
+                }
+                var categoryDto = mapper.Map<CategoryDto>(updated);
+                return categoryDto;
             }
-
-            existing.UpdateName(updateCategoryRequestDto.Name);
-
-            var updated = await repository.UpdateAsync(existing, id);
-            if (updated == null)
+            catch (Exception ex)
             {
-                return null;
+                logger.LogError(ex, "Error updating category with id {CategoryId}", id);
+                throw;
             }
-            var categoryDto = mapper.Map<CategoryDto>(updated);
-            return categoryDto;
         }
     }
 }
