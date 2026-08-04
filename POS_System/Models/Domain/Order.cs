@@ -17,5 +17,49 @@ namespace POS_System.Models.Domain
         public string Status { get; set; } // pending , Completed
         // Navigaion Properties
         public List<OrderItem> OrderItems { get; set; }
+
+        public Order()
+        {
+        }
+
+        /// <summary>
+        /// Initialize order for creation (assign ids, timestamps, numbers and basic status)
+        /// </summary>
+        public void InitializeForCreate(string userId, string cashierName, bool isPending)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) throw new ArgumentException("UserId must be provided", nameof(userId));
+            if (string.IsNullOrWhiteSpace(cashierName)) cashierName = "";
+
+            if (string.IsNullOrWhiteSpace(Id))
+            {
+                Id = Guid.NewGuid().ToString();
+            }
+
+            if (OrderItems != null)
+            {
+                foreach (var item in OrderItems)
+                {
+                    if (string.IsNullOrWhiteSpace(item.Id)) item.Id = Guid.NewGuid().ToString();
+                    item.OrderId = Id;
+                }
+            }
+
+            UserId = userId;
+            CashierName = cashierName;
+            OrderDate = DateTime.UtcNow;
+            Status = isPending ? "Pending" : "Completed";
+            OrderNumber = $"INV-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}";
+        }
+
+        public void CalculateTotal()
+        {
+            if (OrderItems == null) { TotalAmount = 0; return; }
+            decimal total = 0;
+            foreach (var item in OrderItems)
+            {
+                total += item.SubTotal;
+            }
+            TotalAmount = total;
+        }
     }
 }

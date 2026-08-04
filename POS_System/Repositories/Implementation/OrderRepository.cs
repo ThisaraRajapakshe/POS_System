@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using POS_System.Data;
 using POS_System.Models.Domain;
 
@@ -7,10 +9,12 @@ namespace POS_System.Repositories.Implementation
     public class OrderRepository : IOrderRepository
     {
         private readonly PosSystemDbContext _context;
+        private readonly ILogger<OrderRepository> logger;
 
-        public OrderRepository(PosSystemDbContext context)
+        public OrderRepository(PosSystemDbContext context, ILogger<OrderRepository>? logger = null)
         {
             _context = context;
+            this.logger = logger ?? NullLogger<OrderRepository>.Instance;
         }
 
         public async Task<Order> CreateOrderAsync(Order order)
@@ -30,6 +34,7 @@ namespace POS_System.Repositories.Implementation
                         .FirstOrDefaultAsync(x => x.Id == item.ProductLineItemId);
                     if (productInDb == null)
                     {
+                        logger.LogWarning("Product {ProductLineItemId} not found", item.ProductLineItemId);
                         throw new Exception($"Product {item.ProductLineItemId} not found.");
                     }
                     item.ProductName = productInDb.Product.Name;
@@ -41,6 +46,7 @@ namespace POS_System.Repositories.Implementation
                     //  2. Check if we have enough stock
                     if (productInDb.Quantity < item.Quantity)
                     {
+                        logger.LogWarning("Not enough stock for {ProductLineItemId}. Available: {Available}", productInDb.Id, productInDb.Quantity);
                         throw new Exception($"Not enough stock for {productInDb.Id}. Only Available {productInDb.Quantity}");
                     }
                     //  3. Reduce Stock
@@ -51,12 +57,13 @@ namespace POS_System.Repositories.Implementation
                 await transaction.CommitAsync();
                 return order;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogError(ex, "Error creating order {OrderId}", order?.Id);
                 await transaction.RollbackAsync();
                 throw;
             }
-            
+
         }
 
         public async Task<Order> FindByIdAsync(string id)

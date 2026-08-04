@@ -23,5 +23,9 @@ namespace POS_System.Models.Domain
         [Column(TypeName = "decimal(18,2)")]
         public decimal Cost { get; set; }
 
+        public void CalculateSubTotal()
+        {
+            SubTotal = SalesPrice * Quantity;
+        }
     }
 }

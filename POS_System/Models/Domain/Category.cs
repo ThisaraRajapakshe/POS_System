@@ -4,7 +4,7 @@
     {
         // Keep simple for EF and mapping compatibility but add basic domain behavior
         public string Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; }    
 
         public Category()
         {
