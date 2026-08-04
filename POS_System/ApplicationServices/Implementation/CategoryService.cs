@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using POS_System.Models.Domain;
 using POS_System.Models.Dto;
 using POS_System.Repositories;
@@ -12,11 +13,11 @@ namespace POS_System.ApplicationServices.Implementation
         private readonly ICategoryRepository repository;
         private readonly ILogger<CategoryService> logger;
 
-        public CategoryService(IMapper mapper, ICategoryRepository repository, ILogger<CategoryService> logger)
+        public CategoryService(IMapper mapper, ICategoryRepository repository, ILogger<CategoryService>? logger = null)
         {
             this.mapper = mapper;
             this.repository = repository;
-            this.logger = logger;
+            this.logger = logger ?? NullLogger<CategoryService>.Instance;
         }
 
         public Task<bool> DeleteCategory(string id)

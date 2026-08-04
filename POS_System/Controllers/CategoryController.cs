@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using POS_System.ApplicationServices;
 using POS_System.Models.Dto;
 using POS_System.Models.Identity;
@@ -17,10 +18,10 @@ namespace POS_System.Controllers
         private readonly ICategoryService categoryService;
         private readonly ILogger<CategoryController> logger;
 
-        public CategoryController(ICategoryService categoryService, ILogger<CategoryController> logger)
+        public CategoryController(ICategoryService categoryService, ILogger<CategoryController>? logger = null)
         {
             this.categoryService = categoryService;
-            this.logger = logger;
+            this.logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<CategoryController>.Instance;
         }
         [HttpGet]
         public async Task<IActionResult> GetAll()

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using POS_System.ApplicationServices;
 using POS_System.Models.Dto;
 using POS_System.Models.Identity;
@@ -17,10 +18,10 @@ namespace POS_System.Controllers
         private readonly IProductService productService;
         private readonly ILogger<ProductController> logger;
 
-        public ProductController(IProductService productService, ILogger<ProductController> logger)
+        public ProductController(IProductService productService, ILogger<ProductController>? logger = null)
         {
             this.productService = productService;
-            this.logger = logger;
+            this.logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<ProductController>.Instance;
         }
         [HttpGet]
         public async Task<IActionResult> Get()

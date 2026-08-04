@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using POS_System.Models.Domain;
 using POS_System.Models.Dto;
 using POS_System.Repositories;
@@ -12,11 +13,11 @@ namespace POS_System.ApplicationServices.Implementation
         private readonly IMapper mapper;
         private readonly ILogger<ProductLineItemService> logger;
 
-        public ProductLineItemService(IProductLineItemRepository repository, IMapper mapper, ILogger<ProductLineItemService> logger)
+        public ProductLineItemService(IProductLineItemRepository repository, IMapper mapper, ILogger<ProductLineItemService>? logger = null)
         {
             this.repository = repository;
             this.mapper = mapper;
-            this.logger = logger;
+            this.logger = logger ?? NullLogger<ProductLineItemService>.Instance;
         }
 
         public Task<bool> DeleteProductLineItem(string id)

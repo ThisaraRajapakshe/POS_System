@@ -5,9 +5,9 @@
         public string Id { get; set; } = string.Empty;
         public string BarCodeId { get; set; } = string.Empty;
         public string ProductId { get; set; } = string.Empty;
-        public double Cost { get; set; }
-        public double DisplayPrice { get; set; }
-        public double DiscountedPrice { get; set; }
+        public decimal Cost { get; set; }
+        public decimal DisplayPrice { get; set; }
+        public decimal DiscountedPrice { get; set; }
         public int Quantity { get; set; }
 
 
