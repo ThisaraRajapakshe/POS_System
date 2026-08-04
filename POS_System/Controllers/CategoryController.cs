@@ -30,12 +30,12 @@ namespace POS_System.Controllers
         [Route("{id}")]
         public async Task<IActionResult> Get([FromRoute] string id)
         {
-            var product = await categoryService.GetCategory(id);
-            if (product == null)
+            var category = await categoryService.GetCategory(id);
+            if (category == null)
             {
                 return NotFound();
             }
-            return Ok(product);
+            return Ok(category);
         }
         [HttpPost]
         [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
@@ -50,12 +50,12 @@ namespace POS_System.Controllers
 
         public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdateCategoryRequestDto updateCategoryRequestDto)
         {
-            var product = await categoryService.UpdateCategory(updateCategoryRequestDto, id);
-            if (product == null)
+            var category = await categoryService.UpdateCategory(updateCategoryRequestDto, id);
+            if (category == null)
             {
                 return NotFound();
             }
-            return Ok(product);
+            return Ok(category);
         }
         [HttpDelete]
         [Route("{id}")]

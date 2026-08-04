@@ -2,7 +2,6 @@
 using POS_System.Models.Domain;
 using POS_System.Models.Dto;
 using POS_System.Repositories;
-using POS_System.Repositories.Implementation;
 
 namespace POS_System.ApplicationServices.Implementation
 {
@@ -16,10 +15,10 @@ namespace POS_System.ApplicationServices.Implementation
             this.mapper = mapper;
             this.repository = repository;
         }
+
         public Task<bool> DeleteCategory(string id)
         {
             return repository.DeleteAsync(id);
-
         }
 
         public async Task<List<CategoryDto>> GetCategories()
@@ -40,7 +39,8 @@ namespace POS_System.ApplicationServices.Implementation
 
         public async Task<CategoryDto> InsertCategory(CreateCategoryRequestDto createCategoryRequestDto)
         {
-            var domainModel = mapper.Map<Category>(createCategoryRequestDto);
+            // Create domain entity via factory to enforce invariants
+            var domainModel = Category.Create(createCategoryRequestDto.Name);
             domainModel = await repository.CreateAsync(domainModel);
             var categoryDto = mapper.Map<CategoryDto>(domainModel);
             return categoryDto;
@@ -48,13 +48,21 @@ namespace POS_System.ApplicationServices.Implementation
 
         public async Task<CategoryDto?> UpdateCategory(UpdateCategoryRequestDto updateCategoryRequestDto, string id)
         {
-            var domainModel = mapper.Map<Category>(updateCategoryRequestDto);
-            domainModel = await repository.UpdateAsync(domainModel, id);
-            if (domainModel == null)
+            // Load existing domain entity and apply domain logic
+            var existing = await repository.GetAsync(id);
+            if (existing == null)
             {
                 return null;
             }
-            var categoryDto = mapper.Map<CategoryDto>(domainModel);
+
+            existing.UpdateName(updateCategoryRequestDto.Name);
+
+            var updated = await repository.UpdateAsync(existing, id);
+            if (updated == null)
+            {
+                return null;
+            }
+            var categoryDto = mapper.Map<CategoryDto>(updated);
             return categoryDto;
         }
     }
