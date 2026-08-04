@@ -4,8 +4,8 @@ namespace POS_System.Models.Dto
 {
     public class ProductDto
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public CategoryDto category { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public CategoryDto category { get; set; } = new CategoryDto();
     }
 }
