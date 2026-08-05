@@ -97,13 +97,13 @@ docker-compose -f docker-compose.local.yml up -d
 ```
 
 This will start:
-- **Backend API** on port `5000`
-- **SQL Server** on port `15000`
+- **Backend API** on port `5001`
+- **SQL Server** on port `15001`
 - **Frontend** on port `4200`
 
 #### 2. Access the API
 
-- **Swagger UI:** `http://localhost:5000/api/swagger/index.html`
+- **Swagger UI:** `http://localhost:5001/api/swagger/index.html`
 
 ---
 
@@ -142,14 +142,12 @@ The application database is seeded with the following default accounts for testi
 
 | Role | Username | Password | Access Level |
 | --- | --- | --- | --- |
-| **Super Admin** | `superadmin` | `Admin@1234!` | Full System Access (All Branches) |
 | **Admin** | *Create via Super Admin* | *Set during creation* | Branch-specific Management |
 | **Manager** | *Create via Super Admin* | *Set during creation* | Inventory Management & Reports |
 | **Cashier** | *Create via Super Admin* | *Set during creation* | Sales & Order Processing |
 
 ### Roles
 
-- **Super Admin:** Full access to all branches, user management, and system settings.
 - **Admin:** Manage users, inventory, and sales within their assigned branch.
 - **Manager:** Manage inventory and view reports within their assigned branch.
 - **Cashier:** Create orders and process sales within their assigned branch.
