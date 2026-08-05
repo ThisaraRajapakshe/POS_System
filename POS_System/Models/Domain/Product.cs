@@ -4,12 +4,12 @@ namespace POS_System.Models.Domain
 {
     public class Product
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string CategoryId { get; set; }
+        public string Id { get; private set; }
+        public string Name { get; private set; }
+        public string CategoryId { get; private set; }
 
         // Navigation Properties
-        public Category Category { get; set; }
+        public Category Category { get; private set; }
 
         public Product()
         {

@@ -5,19 +5,19 @@ namespace POS_System.Models.Domain
 {
     public class ProductLineItem
     {
-        public string Id { get; set; }
-        public string BarCodeId { get; set; }
-        public string ProductId { get; set; }
+        public string Id { get; private set; }
+        public string BarCodeId { get; private set; }
+        public string ProductId { get; private set; }
         [Column(TypeName = "decimal(18,2)")]
-        public decimal Cost { get; set; }
+        public decimal Cost { get; private set; }
         [Column(TypeName = "decimal(18,2)")]
-        public decimal DisplayPrice { get; set; }
+        public decimal DisplayPrice { get; private set; }
         [Column(TypeName = "decimal(18,2)")]
-        public decimal DiscountedPrice { get; set; }
-        public int Quantity { get; set; }
+        public decimal DiscountedPrice { get; private set; }
+        public int Quantity { get; private set; }
 
         //Navigation Properties
-        public Product Product { get; set; }
+        public Product Product { get; private set; }
 
         public ProductLineItem()
         {
@@ -61,6 +61,13 @@ namespace POS_System.Models.Domain
         {
             if (quantity < 0) throw new ArgumentException("Quantity cannot be negative", nameof(quantity));
             Quantity = quantity;
+        }
+
+        public void ReduceStock(int quantityToReduce)
+        {
+            if (quantityToReduce < 0) throw new ArgumentException("Quantity to reduce cannot be negative", nameof(quantityToReduce));
+            if (quantityToReduce > Quantity) throw new InvalidOperationException($"Not enough stock. Available: {Quantity}, Requested: {quantityToReduce}");
+            Quantity -= quantityToReduce;
         }
 
         public void UpdateBarCode(string barCodeId)

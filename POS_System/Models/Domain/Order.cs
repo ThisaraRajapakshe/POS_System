@@ -61,5 +61,29 @@ namespace POS_System.Models.Domain
             }
             TotalAmount = total;
         }
+
+        public void ValidateOrderItems()
+        {
+            if (OrderItems == null || OrderItems.Count == 0)
+            {
+                throw new InvalidOperationException("Order must contain at least one item");
+            }
+
+            foreach (var item in OrderItems)
+            {
+                if (string.IsNullOrWhiteSpace(item.ProductLineItemId))
+                {
+                    throw new ArgumentException("OrderItem ProductLineItemId must be provided");
+                }
+                if (item.Quantity <= 0)
+                {
+                    throw new ArgumentException("OrderItem Quantity must be greater than 0");
+                }
+                if (item.SalesPrice < 0)
+                {
+                    throw new ArgumentException("OrderItem SalesPrice cannot be negative");
+                }
+            }
+        }
     }
 }
