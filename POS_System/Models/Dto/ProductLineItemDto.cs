@@ -2,15 +2,15 @@
 {
     public class ProductLineItemDto
     {
-        public string Id { get; set; }
-        public string BarCodeId { get; set; }
-        public string ProductId { get; set; }
-        public double Cost { get; set; }
-        public double DisplayPrice { get; set; }
-        public double DiscountedPrice { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string BarCodeId { get; set; } = string.Empty;
+        public string ProductId { get; set; } = string.Empty;
+        public decimal Cost { get; set; }
+        public decimal DisplayPrice { get; set; }
+        public decimal DiscountedPrice { get; set; }
         public int Quantity { get; set; }
 
 
-        public ProductDto Product { get; set; }
+        public ProductDto Product { get; set; } = new ProductDto();
     }
 }

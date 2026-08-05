@@ -3,11 +3,19 @@
     "LocalDev": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "swagger",
+      "launchUrl": "api/swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Jwt__Issuer": "https://localhost:5050",
+        "Jwt__Audience": "https://localhost:5050",
+        "ADMIN_DEFAULT_PASSWORD": "Admin@1234!",
+        "ADMIN_DEFAULT_EMAIL": "superadmin@pos.local",
+        "PosSystemConnectionString": "Server=localhost,15001;Database=PosDb;User Id=sa;Password=PosSystem@2026;TrustServerCertificate=True;",
+        "PosSystemAuthConnectionString": "Server=localhost,15001;Database=PosDb;User Id=sa;Password=PosSystem@2026;TrustServerCertificate=True;"
+
+
       },
-      "applicationUrl": "http://localhost:5050",
+      "applicationUrl": "http://localhost:5050/",
       "dotnetRunMessages": true
     },
     "Container (Dockerfile)": {

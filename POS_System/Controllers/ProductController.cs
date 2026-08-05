@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using POS_System.ApplicationServices;
-using POS_System.Models.Domain;
 using POS_System.Models.Dto;
 using POS_System.Models.Identity;
-using System.Reflection.Metadata.Ecma335;
 
 namespace POS_System.Controllers
 {
@@ -16,32 +16,59 @@ namespace POS_System.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService productService;
+        private readonly ILogger<ProductController> logger;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, ILogger<ProductController>? logger = null)
         {
             this.productService = productService;
+            this.logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<ProductController>.Instance;
         }
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Ok(await productService.GetProducts());
+            try
+            {
+                return Ok(await productService.GetProducts());
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in Get products");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting products.");
+            }
         }
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> Get([FromRoute] string id)
         {
-            var product = await productService.GetProduct(id);
-            if (product == null)
+            try
             {
-                return NotFound();
+                var product = await productService.GetProduct(id);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+                return Ok(product);
             }
-            return Ok(product);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in Get product {ProductId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting the product.");
+            }
         }
         [HttpPost]
         [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager},{RoleConstants.StockClerk}")]
         public async Task<IActionResult> Create([FromBody] CreateProductRequestDto createProductRequest)
         {
-            return Ok(await productService.InsertProduct(createProductRequest));
+            try
+            {
+                var result = await productService.InsertProduct(createProductRequest);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in Create product");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the product.");
+            }
         }
 
         [HttpPut]
@@ -50,31 +77,55 @@ namespace POS_System.Controllers
 
         public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdateProductRequestDto updateProductRequest)
         {
-            var product = await productService.UpdateProduct(updateProductRequest, id);
-            if (product == null)
+            try
             {
-                return NotFound();
+                var product = await productService.UpdateProduct(updateProductRequest, id);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+                return Ok(product);
             }
-            return Ok(product);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in Update product {ProductId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the product.");
+            }
         }
         [HttpDelete]
         [Route("{id}")]
         [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> Delete([FromRoute] string id)
         {
-            return await (productService.DeleteProduct(id)) ? Ok(): NotFound();
+            try
+            {
+                return await (productService.DeleteProduct(id)) ? Ok() : NotFound();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in Delete product {ProductId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the product.");
+            }
         }
         //Get Products by Category ID
         //GET /api/categories/{id}/products
         [HttpGet("category/{categoryId}")]
         public async Task<IActionResult> GetProductsbyCategory([FromRoute] string categoryId)
         {
-            var productList = await productService.GetProductsByCategory(categoryId);
-            if (productList == null)
+            try
             {
-                return NotFound();
+                var productList = await productService.GetProductsByCategory(categoryId);
+                if (productList == null)
+                {
+                    return NotFound();
+                }
+                return Ok(productList);
             }
-            return Ok(productList);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in GetProductsbyCategory {CategoryId}", categoryId);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting products by category.");
+            }
         }
 
     }

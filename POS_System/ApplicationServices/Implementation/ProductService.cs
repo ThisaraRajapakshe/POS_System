@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using POS_System.Models.Domain;
 using POS_System.Models.Dto;
 using POS_System.Repositories;
@@ -9,64 +11,126 @@ namespace POS_System.ApplicationServices.Implementation
     {
         private readonly IProductRepository repository;
         private readonly IMapper mapper;
+        private readonly ILogger<ProductService> logger;
 
-        public ProductService(IProductRepository repository, IMapper mapper)
+        public ProductService(IProductRepository repository, IMapper mapper, ILogger<ProductService>? logger = null)
         {
             this.repository = repository;
             this.mapper = mapper;
+            this.logger = logger ?? NullLogger<ProductService>.Instance;
         }
 
         public Task<bool> DeleteProduct(string id)
         {
-            return repository.DeleteAsync(id);
+            try
+            {
+                return repository.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error deleting product with id {ProductId}", id);
+                throw;
+            }
         }
 
         public async Task<List<ProductDto>> GetProducts()
         {
-            var productDomainModel = await repository.GetAllWithCategoryAsync();
-            return  mapper.Map<List<ProductDto>>(productDomainModel);
+            try
+            {
+                var productDomainModel = await repository.GetAllWithCategoryAsync();
+                return mapper.Map<List<ProductDto>>(productDomainModel);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting products");
+                throw;
+            }
         }
 
         public async Task<ProductDto?> GetProduct(string id)
         {
-            var productDomainModel = await repository.GetAsync(id);
-            if (productDomainModel == null)
+            try
             {
-                return null;
+                var productDomainModel = await repository.GetAsync(id);
+                if (productDomainModel == null)
+                {
+                    return null;
+                }
+                return mapper.Map<ProductDto>(productDomainModel);
             }
-            return mapper.Map<ProductDto>(productDomainModel);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting product with id {ProductId}", id);
+                throw;
+            }
         }
 
         public async Task<ProductDto> InsertProduct(CreateProductRequestDto createProductRequestDto)
         {
-            var domainModel = mapper.Map<Product>(createProductRequestDto);
-            domainModel = await repository.CreateAsync(domainModel);
-            var productDto = mapper.Map<ProductDto>(domainModel);
-            return productDto;
+            try
+            {
+                // use domain factory to create product and enforce invariants
+                var domainModel = Product.Create(createProductRequestDto.Name, createProductRequestDto.CategoryId);
+                domainModel = await repository.CreateAsync(domainModel);
+                var productDto = mapper.Map<ProductDto>(domainModel);
+                return productDto;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error inserting product: {Product}", createProductRequestDto);
+                throw;
+            }
         }
 
         public async Task<ProductDto?> UpdateProduct(UpdateProductRequestDto updateProductRequestDto, string id)
         {
-            var domainModel = mapper.Map<Product>(updateProductRequestDto);
-            domainModel = await repository.UpdateAsync(domainModel, id);
-            if (domainModel == null)
+            try
             {
-                return null;
+                var existing = await repository.GetAsync(id);
+                if (existing == null)
+                {
+                    return null;
+                }
+
+                // apply domain operations
+                existing.UpdateName(updateProductRequestDto.Name);
+                if (!string.IsNullOrWhiteSpace(updateProductRequestDto.CategoryId))
+                {
+                    existing.UpdateCategory(updateProductRequestDto.CategoryId);
+                }
+
+                var updated = await repository.UpdateAsync(existing, id);
+                if (updated == null)
+                {
+                    return null;
+                }
+                var productDto = mapper.Map<ProductDto>(updated);
+                return productDto;
             }
-            var productDto = mapper.Map<ProductDto>(domainModel);
-            return productDto;
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error updating product with id {ProductId}", id);
+                throw;
+            }
 
         }
 
         public async Task<List<ProductDto?>> GetProductsByCategory(string categoryId)
         {
-            var domainModel = await repository.GetProductsByCategoryAsync(categoryId);
-            if (domainModel == null)
+            try
             {
-                return new List<ProductDto?>();
+                var domainModel = await repository.GetProductsByCategoryAsync(categoryId);
+                if (domainModel == null)
+                {
+                    return new List<ProductDto?>();
+                }
+                return mapper.Map<List<ProductDto?>>(domainModel);
             }
-            return mapper.Map<List<ProductDto?>>(domainModel);
-            
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting products by category {CategoryId}", categoryId);
+                throw;
+            }
         }
     }
 }

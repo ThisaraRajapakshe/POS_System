@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using POS_System.ApplicationServices;
-using POS_System.ApplicationServices.Implementation;
 using POS_System.Models.Dto;
 using POS_System.Models.Identity;
 
@@ -15,33 +16,75 @@ namespace POS_System.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService categoryService;
+        private readonly ILogger<CategoryController> logger;
 
-        public CategoryController(ICategoryService categoryService)
+        public CategoryController(ICategoryService categoryService, ILogger<CategoryController>? logger = null)
         {
             this.categoryService = categoryService;
+            this.logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<CategoryController>.Instance;
         }
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await categoryService.GetCategories());
+            try
+            {
+                return Ok(await categoryService.GetCategories());
+            }
+            catch (ArgumentException aex)
+            {
+                logger.LogWarning(aex, "Invalid request in GetAll categories");
+                return BadRequest(aex.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in GetAll categories");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting categories.");
+            }
         }
 
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> Get([FromRoute] string id)
         {
-            var product = await categoryService.GetCategory(id);
-            if (product == null)
+            try
             {
-                return NotFound();
+                var category = await categoryService.GetCategory(id);
+                if (category == null)
+                {
+                    return NotFound();
+                }
+                return Ok(category);
             }
-            return Ok(product);
+            catch (ArgumentException aex)
+            {
+                logger.LogWarning(aex, "Invalid request in Get category {CategoryId}", id);
+                return BadRequest(aex.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in Get category {CategoryId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting the category.");
+            }
         }
         [HttpPost]
         [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> Create([FromBody] CreateCategoryRequestDto createCategoryRequestDto)
         {
-            return Ok(await categoryService.InsertCategory(createCategoryRequestDto));
+            try
+            {
+                var result = await categoryService.InsertCategory(createCategoryRequestDto);
+                return Ok(result);
+            }
+            catch (ArgumentException aex)
+            {
+                logger.LogWarning(aex, "Invalid request in Create category");
+                return BadRequest(aex.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in Create category");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the category.");
+            }
         }
 
         [HttpPut]
@@ -50,19 +93,40 @@ namespace POS_System.Controllers
 
         public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdateCategoryRequestDto updateCategoryRequestDto)
         {
-            var product = await categoryService.UpdateCategory(updateCategoryRequestDto, id);
-            if (product == null)
+            try
             {
-                return NotFound();
+                var category = await categoryService.UpdateCategory(updateCategoryRequestDto, id);
+                if (category == null)
+                {
+                    return NotFound();
+                }
+                return Ok(category);
             }
-            return Ok(product);
+            catch (ArgumentException aex)
+            {
+                logger.LogWarning(aex, "Invalid request in Update category {CategoryId}", id);
+                return BadRequest(aex.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in Update category {CategoryId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the category.");
+            }
         }
         [HttpDelete]
         [Route("{id}")]
         [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> Delete([FromRoute] string id)
         {
-            return await (categoryService.DeleteCategory(id)) ? Ok() : NotFound();
+            try
+            {
+                return await (categoryService.DeleteCategory(id)) ? Ok() : NotFound();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in Delete category {CategoryId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the category.");
+            }
         }
     }
 }
