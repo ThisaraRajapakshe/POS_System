@@ -97,7 +97,7 @@ namespace POS_System.ApplicationServices.Implementation
             foreach (var item in order.OrderItems)
             {
                 // Fetch product line item from inventory
-                var productLineItem = await _productLineItemRepository.GetAsync(item.ProductLineItemId);
+                var productLineItem = await _productLineItemRepository.GetByIdWithNavPropsAsync(item.ProductLineItemId);
 
                 if (productLineItem == null)
                 {

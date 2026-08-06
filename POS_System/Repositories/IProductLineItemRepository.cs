@@ -6,5 +6,6 @@ namespace POS_System.Repositories
     {
         Task<List<ProductLineItem>> GetAllWithNavPropsAsync();
         Task<List<ProductLineItem>> GetLineItemByProduct(string productId);
+        Task<ProductLineItem?> GetByIdWithNavPropsAsync(string id);
     }
 }

@@ -31,7 +31,22 @@ namespace POS_System.Repositories.Implementation
                 throw;
             }
         }
-
+        public async Task<ProductLineItem?> GetByIdWithNavPropsAsync(string id)
+        {
+            try
+            {
+                return await dbContext.ProductLineItems
+                    .AsNoTracking()
+                    .Include(pli => pli.Product).
+                        ThenInclude(p => p.Category)
+                    .FirstOrDefaultAsync(pli => pli.Id == id);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error fetching product line item by Id with navigation properties");
+                throw;
+            }
+        }
         public async Task<List<ProductLineItem>> GetLineItemByProduct(string productId)
         {
             try
