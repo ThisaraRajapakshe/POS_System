@@ -3,8 +3,8 @@
     public class Category
     {
         // Keep simple for EF and mapping compatibility but add basic domain behavior
-        public string Id { get; set; }
-        public string Name { get; set; }    
+        public string Id { get; private set; }
+        public string Name { get; private set; }    
 
         public Category()
         {
